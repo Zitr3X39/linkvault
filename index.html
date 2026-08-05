@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="assets/styles.css" />
+<link rel="stylesheet" href="assets/styles.css?v=3" />
 </head>
 <body>
 <a class="skip-link" href="#main">К содержимому</a>
@@ -36,7 +36,8 @@
     </form>
 
     <div class="topbar-actions">
-      <button type="button" class="btn btn-primary" id="btnAdd">
+      <button type="button" class="btn btn-ghost btn-cmdk" id="btnCmdk" aria-label="Быстрый поиск"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M9 3v18M15 3v18M3 9h18M3 15h18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span class="only-wide">Палитра</span><kbd class="kbd only-wide">Ctrl K</kbd></button>
+      <button type="button" class="btn btn-primary magnetic" id="btnAdd">
         <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         Добавить
       </button>
@@ -61,8 +62,14 @@
     </aside>
 
     <main class="content" id="main">
+      <section class="hero">
+        <h1 class="hero-title"><span class="w" style="animation-delay:.02s">Всё,</span> <span class="w" style="animation-delay:.08s">что</span> <span class="w" style="animation-delay:.14s">ты</span> <span class="w" style="animation-delay:.20s">сохранил</span> <span class="w grad" style="animation-delay:.26s">в</span> <span class="w grad" style="animation-delay:.32s">одном</span> <span class="w grad" style="animation-delay:.38s">месте</span></h1>
+        <p class="hero-sub">Репозитории, каналы, тулзы и видео — разложено по категориям и цветам, без поисков по закладкам.</p>
+        <div class="stats" id="stats"><div class="stat"><span class="stat-num" id="statLinks">0</span><span class="stat-cap">ссылок</span></div><div class="stat"><span class="stat-num" id="statCats">0</span><span class="stat-cap">категорий</span></div><div class="stat"><span class="stat-num" id="statSources">0</span><span class="stat-cap">источников</span></div><div class="stat"><span class="stat-num" id="statFav">0</span><span class="stat-cap">в избранном</span></div></div>
+      </section>
+
       <div class="content-head">
-        <h1 id="viewTitle">Всё хранилище</h1>
+        <h2 id="viewTitle">Всё хранилище</h2>
         <div class="content-tools">
           <span class="count" id="viewCount"></span>
           <label class="sr-only" for="sort">Сортировка</label>
@@ -184,5 +191,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="assets/app.js" defer></script>
+<script src="assets/fx.js" defer></script>
 </body>
 </html>
