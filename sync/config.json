@@ -1,0 +1,7 @@
+{
+ "api_id": 0,
+ "api_hash": "",
+ "chats": ["me"],
+ "limit": 3000,
+ "enrich": true
+}

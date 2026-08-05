@@ -1,0 +1,70 @@
+{
+ "categories": [
+  { "id": "video", "name": "Видео / YouTube", "color": "#FF6B57" },
+  { "id": "vibecoding", "name": "Вайб-кодинг / AI", "color": "#A78BFA" },
+  { "id": "prompts", "name": "Промты", "color": "#F2A03D" },
+  { "id": "design", "name": "Дизайн / монтаж", "color": "#F472B6" },
+  { "id": "gamedev", "name": "Геймдев", "color": "#34D399" },
+  { "id": "automation", "name": "Автоматизация", "color": "#38BDF8" },
+  { "id": "tools", "name": "Софт / утилиты", "color": "#94A3B8" },
+  { "id": "learning", "name": "Обучение / языки", "color": "#FACC15" },
+  { "id": "marketing", "name": "Маркетинг / SMM", "color": "#C08457" },
+  { "id": "other", "name": "Разное", "color": "#8B8B86" }
+ ],
+ "types": {
+  "github": "GitHub",
+  "telegram": "Telegram",
+  "tiktok": "TikTok",
+  "youtube": "YouTube",
+  "twitter": "X / Twitter",
+  "reddit": "Reddit",
+  "site": "Сайт"
+ },
+ "rules": [
+  {
+   "cat": "video",
+   "domains": ["youtube.com", "youtu.be", "tiktok.com", "vimeo.com", "rutube.ru", "twitch.tv", "capcut.com", "elevenlabs.io", "descript.com", "opus.pro", "submagic.co", "viewstats.com", "vidiq.com", "tubebuddy.com", "heygen.com", "runwayml.com", "pika.art", "kapwing.com"],
+   "words": ["видео", "ролик", "шортс", "shorts", "reels", "рилс", "монтаж", "озвучка", "голос", "voice", "субтитры", "стрим", "канал", "youtube", "тикток"]
+  },
+  {
+   "cat": "vibecoding",
+   "domains": ["cursor.com", "cursor.sh", "lovable.dev", "bolt.new", "v0.dev", "replit.com", "windsurf.com", "codeium.com", "claude.ai", "openai.com", "chatgpt.com", "anthropic.com", "perplexity.ai", "huggingface.co", "ollama.com", "langchain.com", "vercel.com", "supabase.com", "deepseek.com", "mistral.ai", "together.ai", "groq.com", "aistudio.google.com"],
+   "words": ["вайбкод", "вайб-код", "vibe cod", "нейросет", "ии ", " ai", "ai-", "llm", "gpt", "claude", "агент", "agent", "copilot", "кодинг", "api", "sdk", "бэкенд", "фронтенд", "библиотека", "framework", "фреймворк"]
+  },
+  {
+   "cat": "prompts",
+   "domains": ["promptingguide.ai", "promptbase.com", "flowgpt.com", "promptperfect.jina.ai", "snackprompt.com", "promptheroes.ai", "prompthero.com"],
+   "words": ["промт", "промпт", "prompt", "шаблон запрос", "system prompt", "jailbreak", "инструкции для гпт"]
+  },
+  {
+   "cat": "design",
+   "domains": ["figma.com", "dribbble.com", "behance.net", "canva.com", "framer.com", "webflow.com", "coolors.co", "fonts.google.com", "unsplash.com", "pexels.com", "lottiefiles.com", "spline.design", "blender.org", "photopea.com", "removebg.com", "remove.bg", "icons8.com", "heroicons.com", "lucide.dev", "uiverse.io", "mobbin.com", "godly.website", "land-book.com"],
+   "words": ["дизайн", "design", "ui", "ux", "шрифт", "font", "иконк", "icon", "макет", "палитр", "цвета", "анимаци", "логотип", "мокап", "mockup", "текстур"]
+  },
+  {
+   "cat": "gamedev",
+   "domains": ["godotengine.org", "unity.com", "unrealengine.com", "itch.io", "gamedev.ru", "opengameart.org", "kenney.nl", "construct.net", "gdevelop.io", "defold.com", "rpgmakerweb.com", "steamworks.com"],
+   "words": ["геймдев", "gamedev", "играется", "движок", "engine", "unity", "unreal", "godot", "пиксель-арт", "спрайт", "sprite", "shader", "шейдер", "уровни игры", "геймплей"]
+  },
+  {
+   "cat": "automation",
+   "domains": ["n8n.io", "make.com", "zapier.com", "ifttt.com", "airtable.com", "pipedream.com", "activepieces.com", "nodered.org", "selenium.dev", "playwright.dev", "puppeteer.js.org", "apify.com", "browserless.io", "docker.com"],
+   "words": ["автоматизаци", "automation", "workflow", "сценарий", "бот", "bot", "парсер", "parser", "scraping", "скрап", "webhook", "cron", "планировщик", "интеграци"]
+  },
+  {
+   "cat": "tools",
+   "domains": ["obsproject.com", "7-zip.org", "notepad-plus-plus.org", "rufus.ie", "ventoy.net", "sumatrapdfreader.org", "portableapps.com", "ninite.com", "voidtools.com", "sysinternals.com", "qbittorrent.org", "vlc.org", "videolan.org", "handbrake.fr", "ffmpeg.org", "obsidian.md", "localsend.org", "winscp.net", "putty.org"],
+   "words": ["утилит", "программ", "софт", "software", "tool", "cli", "конвертер", "downloader", "скачать видео", "архиватор", "бэкап", "backup", "windows"]
+  },
+  {
+   "cat": "learning",
+   "domains": ["apps.ankiweb.net", "ankiweb.net", "duolingo.com", "coursera.org", "stepik.org", "khanacademy.org", "freecodecamp.org", "roadmap.sh", "exercism.org", "leetcode.com", "codewars.com", "quizlet.com", "lingq.com", "reverso.net", "context.reverso.net"],
+   "words": ["курс", "course", "обучени", "урок", "tutorial", "гайд", "guide", "шпаргалк", "cheatsheet", "английск", "языка", "учить", "документаци", "docs", "книга", "book"]
+  },
+  {
+   "cat": "marketing",
+   "domains": ["ahrefs.com", "semrush.com", "similarweb.com", "buffer.com", "later.com", "metricool.com", "tgstat.ru", "telemetr.io", "popsters.ru", "mailchimp.com", "sendpulse.com", "unisender.com", "yandex.ru", "analytics.google.com"],
+   "words": ["маркетинг", "smm", "seo", "трафик", "реклам", "ads", "воронк", "ключевые слов", "keyword", "аналитик", "охват", "продвижени", "монетизаци"]
+  }
+ ]
+}
