@@ -264,3 +264,48 @@
   var btnCmdk = doc.getElementById("btnCmdk");
   if (btnCmdk) btnCmdk.addEventListener("click", palOpen);
 })();
+
+/* ---------- accent presets ---------- */
+(function () {
+  "use strict";
+  var ACCENTS = [
+    { id: "violet", name: "Фиолет", c: "#7C5CFF" },
+    { id: "blue", name: "Синий", c: "#3B82F6" },
+    { id: "amber", name: "Янтарь", c: "#FFB020" },
+    { id: "rose", name: "Розовый", c: "#FF5D8F" },
+    { id: "mono", name: "Графит", c: "#E8E9ED" },
+    { id: "lime", name: "Лайм", c: "#D8FF4A" }
+  ];
+  var root = document.documentElement;
+  var cur = "violet";
+  try { cur = localStorage.getItem("lv.accent") || "violet"; } catch (e) {}
+  root.setAttribute("data-accent", cur);
+
+  var host = document.querySelector(".topbar-actions");
+  if (!host) return;
+  var wrap = document.createElement("div");
+  wrap.className = "accent-pick";
+  wrap.setAttribute("role", "group");
+  wrap.setAttribute("aria-label", "Цвет акцента");
+  ACCENTS.forEach(function (a) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "accent-dot";
+    b.dataset.accent = a.id;
+    b.style.color = a.c;
+    b.title = a.name;
+    b.setAttribute("aria-label", "Акцент: " + a.name);
+    b.setAttribute("aria-pressed", String(a.id === cur));
+    b.addEventListener("click", function () {
+      cur = a.id;
+      root.setAttribute("data-accent", cur);
+      try { localStorage.setItem("lv.accent", cur); } catch (e) {}
+      var dots = wrap.querySelectorAll(".accent-dot");
+      for (var i = 0; i < dots.length; i++) {
+        dots[i].setAttribute("aria-pressed", String(dots[i].dataset.accent === cur));
+      }
+    });
+    wrap.appendChild(b);
+  });
+  host.insertBefore(wrap, host.firstChild);
+})();
