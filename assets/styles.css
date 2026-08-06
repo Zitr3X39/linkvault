@@ -563,3 +563,28 @@ html,body{max-width:100%;overflow-x:clip}
 .cursor-label{font-size:9.5px;padding:4px 9px;letter-spacing:.12em;border-radius:9px}
 .btn-recat{margin-top:8px}
 @media (prefers-reduced-motion:reduce){.card.skel::after{animation:none}}
+
+/* ===== v10: no progress bars, calmer scrolling, real toggle, new settings icon ===== */
+.progress{display:none!important}
+html{scrollbar-width:none}
+html::-webkit-scrollbar{width:0;height:0}
+.sidebar{scrollbar-width:none}
+.sidebar::-webkit-scrollbar{width:0;height:0}
+.blur-veil{height:88px}
+.is-scrolled .blur-veil{opacity:.5}
+.side-check{flex-direction:row-reverse;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border-radius:13px;border:1px solid var(--line);background:var(--glass);font-size:12.5px;font-weight:600;color:var(--text-2);transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease)}
+.side-check:hover{border-color:var(--line-2);color:var(--text);background:color-mix(in srgb,var(--text) 5%,transparent)}
+.side-check input{appearance:none;-webkit-appearance:none;flex:none;position:relative;width:40px;height:23px;margin:0;border-radius:999px;border:1px solid var(--line-2);background:color-mix(in srgb,var(--text) 12%,transparent);cursor:pointer;transition:background .25s var(--ease),border-color .25s var(--ease)}
+.side-check input::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--text-2);transition:transform .3s var(--spring),background .25s var(--ease)}
+.side-check input:checked{background:var(--accent);border-color:transparent}
+.side-check input:checked::after{transform:translateX(17px);background:var(--ink)}
+.side-check input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-translate{margin-top:8px}
+
+/* ===== v10: slower, readable intro ===== */
+.intro::before{animation-duration:2.6s}
+.intro-mark{animation-duration:1.15s}
+.intro-name span{animation-duration:.8s}
+.intro-bar{width:190px}
+.intro-bar i{animation-duration:2.45s}
+.intro.is-out{animation-duration:.9s}

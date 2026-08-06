@@ -678,6 +678,64 @@
     toast("Разложено: " + n);
   }
 
+  const TR_KEY = "lv.tr.v1";
+  function trCache() { try { return JSON.parse(localStorage.getItem(TR_KEY) || "{}"); } catch (e) { return {}; } }
+  function trSave(c) { try { localStorage.setItem(TR_KEY, JSON.stringify(c)); } catch (e) {} }
+  function needsRu(t) {
+    if (!t) return false;
+    const letters = (String(t).match(/\p{L}/gu) || []).length;
+    if (letters < 4) return false;
+    const cyr = (String(t).match(/[\u0400-\u04FF]/g) || []).length;
+    return cyr / letters < 0.45;
+  }
+  async function translateOne(text) {
+    const q = String(text).slice(0, 480);
+    try {
+      const r = await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ru&dt=t&q=" + encodeURIComponent(q));
+      if (r.ok) {
+        const j = await r.json();
+        const out = (j[0] || []).map((x) => x[0]).join("").trim();
+        if (out) return out;
+      }
+    } catch (e) {}
+    try {
+      const r2 = await fetch("https://api.mymemory.translated.net/get?langpair=en|ru&q=" + encodeURIComponent(q));
+      if (r2.ok) {
+        const j2 = await r2.json();
+        const out2 = String(((j2 || {}).responseData || {}).translatedText || "").trim();
+        if (out2 && !/MYMEMORY WARNING|QUERY LENGTH/i.test(out2)) return out2;
+      }
+    } catch (e) {}
+    return "";
+  }
+  async function translateAll() {
+    const targets = state.items.filter((it) => needsRu(it.description));
+    if (!targets.length) { toast("\u0412\u0441\u0435 \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u044f \u0443\u0436\u0435 \u043d\u0430 \u0440\u0443\u0441\u0441\u043a\u043e\u043c"); return; }
+    const cache = trCache();
+    const o = readOverlay();
+    let done = 0, ok = 0;
+    const say = (n) => toast("\u041f\u0435\u0440\u0435\u0432\u043e\u0436\u0443: " + n + " / " + targets.length);
+    say(0);
+    for (const it of targets) {
+      let ru = cache[it.description];
+      if (!ru) { ru = await translateOne(it.description); if (ru) cache[it.description] = ru; }
+      if (ru) {
+        o.edits[it.url_key] = Object.assign({}, o.edits[it.url_key] || {}, { description: ru });
+        ok++;
+      }
+      done++;
+      say(done);
+      await new Promise((r) => setTimeout(r, 220));
+    }
+    trSave(cache);
+    if (!ok) { toast("\u041f\u0435\u0440\u0435\u0432\u043e\u0434\u0447\u0438\u043a \u043d\u0435 \u043e\u0442\u0432\u0435\u0442\u0438\u043b \u2014 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439 \u043f\u043e\u0437\u0436\u0435"); return; }
+    writeOverlay(o);
+    applyOverlay();
+    renderAll();
+    updatePendingHint();
+    toast("\u041f\u0435\u0440\u0435\u0432\u0435\u0434\u0435\u043d\u043e: " + ok);
+  }
+
   async function boot() {
     ["brandMeta","searchForm","q","btnAdd","btnTheme","btnSettings","navCategories","navSources","btnExport","pendingHint","viewTitle","viewCount","sort","btnFav","grid","empty","emptyTitle","emptyText","btnEmptyAdd","dlgAdd","formAdd","addText","addEnrich","addSubmit","dlgEdit","formEdit","editTitle","editDesc","editCat","editTags","editNote","editUrl","btnDelete","dlgSettings","formSettings","setRepo","setBranch","setToken","btnForget","toast"].forEach((id) => { el[id] = $(id); });
 
@@ -685,6 +743,8 @@
     setTheme(saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
 
     wireEvents();
+    const tb = document.getElementById("btnTranslate");
+    if (tb) tb.addEventListener("click", translateAll);
     const rb = document.getElementById("btnRecat");
     if (rb) rb.addEventListener("click", recategorize);
     readUrl();

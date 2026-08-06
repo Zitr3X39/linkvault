@@ -24,7 +24,7 @@
 
   var progress = make("div", "progress");
   progress.setAttribute("aria-hidden", "true");
-  doc.body.appendChild(progress);
+  /* v10: progress bar removed on request */
 
   var toTop = make("button", "to-top", "<svg viewBox='0 0 24 24' width='18' height='18' aria-hidden='true'><path d='M12 19V6m0 0-6 6m6-6 6 6' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
   toTop.type = "button";
@@ -59,8 +59,10 @@
     io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) {
-          e.target.classList.add("in");
-          io.unobserve(e.target);
+          var t = e.target;
+          t.classList.add("in");
+          io.unobserve(t);
+          setTimeout(function () { t.style.transitionDelay = ""; }, 820);
         }
       });
     }, { rootMargin: "0px 0px -40px 0px", threshold: 0.05 });
@@ -74,7 +76,7 @@
       c.setAttribute("data-fx", "1");
       if (io) {
         c.classList.add("reveal");
-        c.style.transitionDelay = (i % 8) * 45 + "ms";
+        c.style.transitionDelay = (i % 6) * 26 + "ms";
         io.observe(c);
       }
     }
@@ -434,7 +436,8 @@
   function upd() {
     tick = 0;
     var y = window.pageYOffset || 0;
-    root.classList.toggle("is-scrolled", y > 130);
+    if (y > 150) root.classList.add("is-scrolled");
+    else if (y < 90) root.classList.remove("is-scrolled");
     root.style.setProperty("--sy", String(Math.min(y, 700)));
   }
   window.addEventListener("scroll", function () {
