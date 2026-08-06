@@ -509,12 +509,12 @@ html,body{max-width:100%;overflow-x:clip}
 
 /* smaller, sharper cursor with a spinning dashed halo on interactive things */
 .cursor-dot{width:4px;height:4px;transition:width .25s var(--spring),height .25s var(--spring),opacity .3s}
-.cursor-ring{width:20px;height:20px;border:1.5px solid rgba(255,255,255,.5);transition:width .3s var(--spring),height .3s var(--spring),border-color .25s,opacity .3s}
+.cursor-ring{width:16px;height:16px;border:1.5px solid rgba(255,255,255,.5);transition:width .3s var(--spring),height .3s var(--spring),border-color .25s,opacity .3s}
 .cursor-ring::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.85);opacity:0;transform:scale(.7);transition:opacity .25s var(--ease),transform .3s var(--spring)}
-.is-cursor.is-hot .cursor-ring{width:26px;height:26px;border-color:rgba(255,255,255,.2)}
+.is-cursor.is-hot .cursor-ring{width:22px;height:22px;border-color:rgba(255,255,255,.2)}
 .is-cursor.is-hot .cursor-ring::before{opacity:1;transform:none;animation:cursorSpin 3.6s linear infinite}
 .is-cursor.is-hot .cursor-dot{width:6px;height:6px}
-.is-cursor.is-down .cursor-ring{width:13px;height:13px;border-width:2px}
+.is-cursor.is-down .cursor-ring{width:12px;height:12px;border-width:2px}
 .is-cursor.is-down .cursor-dot{width:3px;height:3px}
 @keyframes cursorSpin{to{transform:rotate(360deg)}}
 
@@ -534,7 +534,7 @@ html,body{max-width:100%;overflow-x:clip}
 @keyframes shimmer{to{background-position:-220% 0}}
 .side-check{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--text-3);cursor:pointer}
 
-.cursor-label{position:fixed;top:0;left:0;z-index:91;pointer-events:none;padding:5px 11px;border-radius:999px;background:var(--text);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;opacity:0;transition:opacity .22s var(--ease)}
+.cursor-label{position:fixed;top:0;left:0;z-index:91;pointer-events:none;padding:3px 8px;border-radius:999px;background:var(--text);color:var(--ink);font:600 10px/1.4 "Golos Text",sans-serif;letter-spacing:.04em;white-space:nowrap;opacity:0;transition:opacity .18s var(--ease)}
 .is-cursor.is-label .cursor-label{opacity:1}
 
 .rv{opacity:0;transform:translateY(20px);filter:blur(7px);transition:opacity .75s var(--ease),transform .75s var(--ease),filter .75s var(--ease)}
@@ -560,7 +560,7 @@ html,body{max-width:100%;overflow-x:clip}
 .card.skel .sk-line{height:12px;margin-bottom:9px}
 .card.skel .sk-line.w80{width:80%}
 .card.skel .sk-line.w55{width:55%}
-.cursor-label{font-size:9.5px;padding:4px 9px;letter-spacing:.12em;border-radius:9px}
+.cursor-label{font-size:9.5px;padding:4px 9px;border-radius:9px}
 .btn-recat{margin-top:8px}
 @media (prefers-reduced-motion:reduce){.card.skel::after{animation:none}}
 
@@ -588,3 +588,19 @@ html::-webkit-scrollbar{width:0;height:0}
 .intro-bar{width:190px}
 .intro-bar i{animation-duration:2.45s}
 .intro.is-out{animation-duration:.9s}
+
+/* ===== v13: source chips, own covers, dup flash, faceted counters ===== */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 16px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:auto;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--text-2);font:500 12.5px/1.4 "Golos Text",sans-serif;cursor:pointer;transition:border-color .18s var(--ease),color .18s var(--ease),background .18s var(--ease),transform .18s var(--ease)}
+.chip:hover{border-color:var(--line-2);color:var(--text);transform:translateY(-1px)}
+.chip.is-on{background:var(--text);color:var(--ink);border-color:var(--text);font-weight:600}
+.chip-num{font-family:"JetBrains Mono",monospace;font-size:10.5px;opacity:.62}
+.card-media.is-cover{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:5px;padding:14px 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--cat) 26%,var(--ink-2)) 0%,color-mix(in srgb,var(--cat) 8%,var(--ink-2)) 55%,var(--ink-2) 100%)}
+.card-media.is-cover::after{content:attr(data-letter);position:absolute;right:8px;top:-14px;font:700 92px/1 "Unbounded",sans-serif;color:var(--cat);opacity:.13;pointer-events:none}
+.cover-fav{width:26px;height:26px;border-radius:7px;background:var(--ink-3);padding:3px;object-fit:contain}
+.cover-title{font:600 14.5px/1.25 "Golos Text",sans-serif;color:var(--text);max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cover-stars{font:500 11px/1 "JetBrains Mono",monospace;color:var(--cat);letter-spacing:.04em}
+.card.is-flash{animation:flashRing 2.6s var(--ease)}
+@keyframes flashRing{0%,60%{box-shadow:0 0 0 2px var(--cat),0 0 32px color-mix(in srgb,var(--cat) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
+.nav-item.is-zero{opacity:.38}
+.ver-line{margin-top:9px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);opacity:.55}
