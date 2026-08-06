@@ -115,14 +115,38 @@
     return "site";
   }
 
+  const STRONG_RULES = [
+    ["automation", ["mcp", "n8n", "zapier", "webhook", "telethon", "telegram bot", "автоматиз"]],
+    ["gamedev", ["godot", "unity", "unreal"]],
+    ["video", ["ffmpeg", "davinci", "capcut", "монтаж", "озвуч"]],
+    ["design", ["figma", "photoshop", "illustrator", "ui/ux"]],
+    ["vibecoding", ["llm", "gpt", "openai", "anthropic", "claude", "langchain", "prompt"]]
+  ];
+
+  const EXTRA_RULES = [
+    ["video", ["video", "видео", "ffmpeg", "montage", "монтаж", "shorts", "tts", "voice", "озвуч", "subtitle", "субтитр", "davinci", "capcut", "premiere", "youtube", "stream", "ролик"]],
+    ["vibecoding", ["ai ", "ai-", "-ai", "llm", "gpt", "claude", "openai", "anthropic", "prompt", "agent", "langchain", "copilot", "cursor", "neural", "нейрос", "machine learning", "fine-tun", "embedding", "vector db"]],
+    ["gamedev", ["game", "игр", "godot", "unity", "unreal", "sprite", "pixel art"]],
+    ["design", ["design", "дизайн", "figma", "ui/ux", "icon", "шрифт", "font", "mockup", "photoshop", "illustrator"]],
+    ["automation", ["mcp", "telegram", "n8n", "zapier", "workflow", "automation", "automated", "автоматиз", "webhook", "scraper", "парсер", "selenium", "playwright", "integration", "bot ", "bots"]],
+    ["learning", ["course", "курс", "tutorial", "learn", "обучен", "guide", "гайд", "docs", "documentation", "roadmap", "awesome ", "cheatsheet"]],
+    ["tools", ["cli", "downloader", "converter", "конверт", "utility", "утилит", "manager", "backup", "extension", "расширен", "toolkit"]]
+  ];
+
   function detectCategory(url, text) {
     const hay = ((url || "") + " " + (text || "")).toLowerCase();
     const d = domainOf(url);
     for (const rule of state.rules) {
       if ((rule.domains || []).some((x) => d === x || d.endsWith("." + x))) return rule.cat;
     }
+    for (const pair of STRONG_RULES) {
+      if (pair[1].some((w) => hay.includes(w))) return pair[0];
+    }
     for (const rule of state.rules) {
       if ((rule.words || []).some((w) => hay.includes(String(w).toLowerCase()))) return rule.cat;
+    }
+    for (const pair of EXTRA_RULES) {
+      if (pair[1].some((w) => hay.includes(w))) return pair[0];
     }
     return "other";
   }
@@ -634,6 +658,26 @@
     });
   }
 
+  function recategorize() {
+    const o = readOverlay();
+    let n = 0;
+    for (const it of state.items) {
+      if ((it.category || "other") !== "other") continue;
+      const hay = [it.title, it.description, it.note, (it.tags || []).join(" ")].join(" ");
+      const cat = detectCategory(it.url, hay);
+      if (cat && cat !== "other") {
+        o.edits[it.url_key] = Object.assign({}, o.edits[it.url_key] || {}, { category: cat });
+        n++;
+      }
+    }
+    if (!n) { toast("Всё уже разложено по категориям"); return; }
+    writeOverlay(o);
+    applyOverlay();
+    renderAll();
+    updatePendingHint();
+    toast("Разложено: " + n);
+  }
+
   async function boot() {
     ["brandMeta","searchForm","q","btnAdd","btnTheme","btnSettings","navCategories","navSources","btnExport","pendingHint","viewTitle","viewCount","sort","btnFav","grid","empty","emptyTitle","emptyText","btnEmptyAdd","dlgAdd","formAdd","addText","addEnrich","addSubmit","dlgEdit","formEdit","editTitle","editDesc","editCat","editTags","editNote","editUrl","btnDelete","dlgSettings","formSettings","setRepo","setBranch","setToken","btnForget","toast"].forEach((id) => { el[id] = $(id); });
 
@@ -641,6 +685,8 @@
     setTheme(saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
 
     wireEvents();
+    const rb = document.getElementById("btnRecat");
+    if (rb) rb.addEventListener("click", recategorize);
     readUrl();
     await loadData();
     renderAll();

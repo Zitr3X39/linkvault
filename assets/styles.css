@@ -546,3 +546,20 @@ html,body{max-width:100%;overflow-x:clip}
 .keys li{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--text-2)}
 .keys kbd{font-family:inherit;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;border:1px solid var(--line-2);background:var(--glass);color:var(--text)}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;filter:none}.card-media::before{animation:none}}
+
+/* ===== v9: fix top blur cutting the hero, faster first paint, skeletons ===== */
+.blur-veil{height:104px}
+.hero{opacity:1;transform:translateY(calc(var(--sy,0) * -0.035px))}
+.hero-title .w{animation-duration:.62s}
+.hero-sub{animation-delay:.26s}
+.stats{animation-delay:.38s}
+.card.skel{min-height:252px;opacity:1;transform:none;filter:none;position:relative;overflow:hidden;border-color:var(--line);background:var(--ink-2);pointer-events:none}
+.card.skel::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 18%,color-mix(in srgb,var(--text) 7%,transparent) 45%,transparent 72%);background-size:220% 100%;animation:shimmer 1.5s linear infinite}
+.card.skel .sk{display:block;background:color-mix(in srgb,var(--text) 7%,transparent);border-radius:8px}
+.card.skel .sk-media{aspect-ratio:16/9;border-radius:calc(var(--radius) - 5px);margin-bottom:13px}
+.card.skel .sk-line{height:12px;margin-bottom:9px}
+.card.skel .sk-line.w80{width:80%}
+.card.skel .sk-line.w55{width:55%}
+.cursor-label{font-size:9.5px;padding:4px 9px;letter-spacing:.12em;border-radius:9px}
+.btn-recat{margin-top:8px}
+@media (prefers-reduced-motion:reduce){.card.skel::after{animation:none}}

@@ -434,7 +434,7 @@
   function upd() {
     tick = 0;
     var y = window.pageYOffset || 0;
-    root.classList.toggle("is-scrolled", y > 24);
+    root.classList.toggle("is-scrolled", y > 130);
     root.style.setProperty("--sy", String(Math.min(y, 700)));
   }
   window.addEventListener("scroll", function () {
@@ -491,7 +491,7 @@
     return "";
   }
   document.addEventListener("pointermove", function (e) {
-    tx = e.clientX; ty = e.clientY + 32;
+    tx = e.clientX + 24; ty = e.clientY + 28;
     var txt = textFor(e.target);
     if (txt) { if (lab.textContent !== txt) lab.textContent = txt; root.classList.add("is-label"); }
     else root.classList.remove("is-label");
@@ -506,12 +506,15 @@
 
 (function () {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-  var sel = [".hero-sub", ".stats", ".content-head", ".sidebar-foot", ".nav-title"];
+  var sel = [".content-head", ".sidebar-foot"];
   var io = new IntersectionObserver(function (rows) {
     rows.forEach(function (r) {
       if (r.isIntersecting) { r.target.classList.add("in"); io.unobserve(r.target); }
     });
   }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+  setTimeout(function () {
+    document.querySelectorAll(".rv").forEach(function (n) { n.classList.add("in"); });
+  }, 1500);
   sel.forEach(function (q, i) {
     document.querySelectorAll(q).forEach(function (n) {
       n.classList.add("rv");
