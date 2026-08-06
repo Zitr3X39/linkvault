@@ -1,0 +1,156 @@
+{
+ "version": 1,
+ "note": "Ручная разметка от агента. Накладывается строго на пустые поля: title/description заполняются только если пустые, category — только если 'other'. Никогда не затирает правки пользователя.",
+ "items": {
+  "github.com/p1ngul1n0/blackbird": {
+   "title": "Blackbird — поиск аккаунтов по нику",
+   "description": "OSINT-инструмент: ищет аккаунты человека по никнейму или email по соцсетям и сайтам.",
+   "category": "osint"
+  },
+  "github.com/x007xyz/flycut-caption": {
+   "title": "Flycut Caption — AI-субтитры для видео",
+   "description": "React-компонент для редактирования субтитров: распознаёт речь через AI и даёт визуальное редактирование дорожки.",
+   "category": "video"
+  },
+  "github.com/firecrawl/pdf-inspector": {
+   "title": "PDF Inspector — анализ PDF на Rust",
+   "description": "Быстрая библиотека: отличает скан от текстового PDF, извлекает текст и помогает выбрать стратегию обработки.",
+   "category": "tools"
+  },
+  "github.com/subtitleedit/plugins": {
+   "title": "Subtitle Edit — плагины",
+   "description": "Коллекция плагинов для Subtitle Edit — популярного редактора субтитров под Windows.",
+   "category": "video"
+  },
+  "github.com/nukeop/nuclear": {
+   "title": "Nuclear — бесплатный музыкальный плеер",
+   "description": "Стриминг-плеер, который ищет и играет музыку из бесплатных источников: YouTube, SoundCloud и других.",
+   "category": "music"
+  },
+  "github.com/img2threejs/img2threejs": {
+   "title": "img2threejs — из картинки в 3D-модель",
+   "description": "Превращает референс-картинку в процедурную 3D-модель на Three.js, готовую к анимации.",
+   "category": "3d"
+  },
+  "github.com/bradautomates/claude-video": {
+   "title": "Claude Video — видео через Claude",
+   "description": "Скиллы и автоматизация создания и монтажа видео с помощью Claude.",
+   "category": "video"
+  },
+  "github.com/ruvnet/ruflo": {
+   "title": "Ruflo — оркестратор AI-агентов",
+   "description": "Оркестрация агентов Claude от ruvnet, из экосистемы Claude Flow.",
+   "category": "vibecoding"
+  },
+  "shadowhint.com/": {
+   "title": "ShadowHint — ИИ-подсказки на собеседованиях",
+   "description": "Скрытый ассистент для Windows: слушает вопросы интервьюера и подсказывает ответы в реальном времени.",
+   "category": "tools"
+  },
+  "github.com/sxyazi/yazi": {
+   "title": "Yazi — файловый менеджер в терминале",
+   "description": "Молниеносный консольный файловый менеджер на Rust с превью изображений.",
+   "category": "tools"
+  },
+  "github.com/lymphatus/caesium-image-compressor": {
+   "title": "Caesium — сжатие картинок",
+   "description": "Сжимает изображения без заметной потери качества. Windows, Mac, Linux.",
+   "category": "tools"
+  },
+  "github.com/aiwithremy/claude-skills-llm-council": {
+   "title": "LLM Council — скилл для Claude",
+   "description": "Скилл для Claude: собирает «совет» из нескольких LLM, чтобы перепроверять ответы.",
+   "category": "ai-skills"
+  },
+  "skills.sh/": {
+   "title": "Skills.sh — каталог скиллов от Vercel",
+   "description": "Официальная директория скиллов для AI-агентов: поиск и установка в одну команду.",
+   "category": "ai-skills"
+  },
+  "skills.sh/vercel-labs/skills/find-skills": {
+   "title": "find-skills — скилл-поисковик",
+   "description": "Скилл от Vercel Labs, который сам находит нужные скиллы под твою задачу.",
+   "category": "ai-skills"
+  },
+  "skillsmp.com/": {
+   "title": "SkillsMP — маркетплейс AI-скиллов",
+   "description": "Больше 2 000 000 открытых скиллов для Claude Code, Codex и ChatGPT. Бесплатный API.",
+   "category": "ai-skills"
+  },
+  "gisfind.online/": {
+   "title": "GisFind — клиенты из 2GIS",
+   "description": "Сбор лидов из 2GIS для веб-студий: телефоны, WhatsApp, Instagram, плюс персональные сообщения от Claude AI.",
+   "category": "marketing"
+  },
+  "motionsites.ai/": {
+   "title": "MotionSites — промты для сайтов",
+   "description": "Библиотека премиум-промптов для Lovable, Bolt, Cursor и Claude: секции, фоны, 3D-сайты.",
+   "category": "prompts"
+  },
+  "github.com/nextlevelbuilder/ui-ux-pro-max-skill": {
+   "title": "UI/UX Pro Max — дизайн-скилл",
+   "description": "Скилл для AI-агентов: правила топового UI/UX-дизайна, анимации и современные паттерны.",
+   "category": "design"
+  },
+  "github.com/21st-dev/magic-mcp": {
+   "title": "Magic MCP — UI-компоненты из 21st.dev",
+   "description": "MCP-сервер 21st.dev: генерирует UI-компоненты прямо в IDE через AI.",
+   "category": "vibecoding"
+  },
+  "21st.dev/ai": {
+   "title": "21st.dev AI — генератор интерфейсов",
+   "description": "AI-генератор UI-компонентов: описываешь словами — получаешь готовый компонент.",
+   "category": "vibecoding"
+  },
+  "chromewebstore.google.com/detail/cat-catch/jfedfbgedapdagkghmgibemcoggfppbb": {
+   "title": "Cat Catch — скачивание видео со страниц",
+   "description": "Расширение Chrome: находит и скачивает видео и другие медиа с любой открытой страницы.",
+   "category": "extensions"
+  },
+  "github.com/qwenaudio/cosyvoice": {
+   "title": "CosyVoice — синтез речи от Qwen",
+   "description": "Нейросеть для генерации и клонирования голоса от Alibaba, семейство Qwen.",
+   "category": "video"
+  },
+  "github.com/deusdata/codebase-memory-mcp": {
+   "title": "Codebase Memory — память для AI-кодинга",
+   "description": "MCP-сервер: даёт AI-агенту долговременную память о кодовой базе проекта.",
+   "category": "vibecoding"
+  },
+  "github.com/diegosouzapw/omniroute": {
+   "title": "OmniRoute — маршрутизатор LLM-запросов",
+   "description": "Единый шлюз для работы с разными AI-моделями через один API.",
+   "category": "vibecoding"
+  },
+  "curseforge.com/minecraft/mc-mods/e4steam": {
+   "title": "E4Steam — мод для Minecraft",
+   "description": "Модификация для Minecraft, страница на CurseForge.",
+   "category": "gamedev"
+  },
+  "alot.pro/": {
+   "title": "Alot.Pro — биржа удалённой работы",
+   "description": "Агрегатор фриланс-заказов: собирает проекты с 25+ площадок, около 6000 новых заданий в день.",
+   "category": "other"
+  },
+  "github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/skill.md": {
+   "title": "Grill-me — скилл жёсткого интервью",
+   "description": "Скилл от Matt Pocock: агент гриллит твой план острыми вопросами, пока не найдёт все дыры. Мы по нему и работаем.",
+   "category": "ai-skills"
+  },
+  "github.com/ath-maas/pixelle-video/tree/main": {
+   "title": "Pixelle-Video — автогенерация шортсов",
+   "description": "AI-движок полностью автоматического производства коротких видео.",
+   "category": "video"
+  },
+  "github.com/santifer/career-ops": {
+   "title": "Career Ops — AI-поиск работы",
+   "description": "Открытый AI-помощник поиска работы: сканирует вакансии, оценивает по шкале A–F, адаптирует резюме, ведёт трекер откликов.",
+   "category": "tools"
+  },
+  "github.com/chigwell/telegram-mcp": {
+   "title": "Telegram MCP — управление Телеграмом",
+   "description": "MCP-сервер на Telethon: читает чаты, управляет группами, отправляет сообщения через AI-агента.",
+   "category": "automation"
+  }
+ }
+}
