@@ -498,3 +498,51 @@ html,body{max-width:100%;overflow-x:clip}
 
 /* v6.2: keep the progressive blur off the sticky sidebar */
 @media (min-width:1101px){.blur-veil{left:calc(max(20px,(100% - 1560px) / 2) + 290px)}}
+
+/* ================= v6.3 - veil on scroll, smaller cursor, empty-state reset ================= */
+/* progressive blur appears only once the page actually scrolls */
+.blur-veil{opacity:0;transition:opacity .38s var(--ease)}
+.is-scrolled .blur-veil{opacity:1}
+
+/* hero drifts away instead of sitting under the blur */
+.hero{transform:translateY(calc(var(--sy,0) * -0.07px));opacity:clamp(0,calc(1 - var(--sy,0) / 470),1)}
+
+/* smaller, sharper cursor with a spinning dashed halo on interactive things */
+.cursor-dot{width:4px;height:4px;transition:width .25s var(--spring),height .25s var(--spring),opacity .3s}
+.cursor-ring{width:20px;height:20px;border:1.5px solid rgba(255,255,255,.5);transition:width .3s var(--spring),height .3s var(--spring),border-color .25s,opacity .3s}
+.cursor-ring::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.85);opacity:0;transform:scale(.7);transition:opacity .25s var(--ease),transform .3s var(--spring)}
+.is-cursor.is-hot .cursor-ring{width:26px;height:26px;border-color:rgba(255,255,255,.2)}
+.is-cursor.is-hot .cursor-ring::before{opacity:1;transform:none;animation:cursorSpin 3.6s linear infinite}
+.is-cursor.is-hot .cursor-dot{width:6px;height:6px}
+.is-cursor.is-down .cursor-ring{width:13px;height:13px;border-width:2px}
+.is-cursor.is-down .cursor-dot{width:3px;height:3px}
+@keyframes cursorSpin{to{transform:rotate(360deg)}}
+
+/* reset-filters escape hatch in the empty state */
+.empty .btn-reset{display:block;margin:12px auto 0}
+@media (prefers-reduced-motion:reduce){.hero{transform:none;opacity:1}}
+
+/* ================= v6.4 - previews, cursor label, section reveals, hotkeys ================= */
+.card-media{position:relative;margin:0 0 13px;aspect-ratio:16/9;border-radius:calc(var(--radius) - 5px);overflow:hidden;border:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,var(--cat,#888) 20%,var(--ink-3)),var(--ink-3))}
+.card-media::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 18%,color-mix(in srgb,var(--text) 8%,transparent) 45%,transparent 72%);background-size:220% 100%;animation:shimmer 1.7s linear infinite}
+.card-media.is-ready::before{display:none}
+.card-media.is-fallback::after{content:attr(data-letter);position:absolute;inset:0;display:grid;place-items:center;font-size:38px;font-weight:800;color:color-mix(in srgb,var(--cat,#888) 65%,var(--text-3));opacity:.55}
+.card-media img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.06);transition:opacity .6s var(--ease),transform .8s var(--ease)}
+.card-media img.is-on{opacity:1;transform:none}
+.card:hover .card-media img.is-on{transform:scale(1.045)}
+.no-previews .card-media{display:none}
+@keyframes shimmer{to{background-position:-220% 0}}
+.side-check{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--text-3);cursor:pointer}
+
+.cursor-label{position:fixed;top:0;left:0;z-index:91;pointer-events:none;padding:5px 11px;border-radius:999px;background:var(--text);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;opacity:0;transition:opacity .22s var(--ease)}
+.is-cursor.is-label .cursor-label{opacity:1}
+
+.rv{opacity:0;transform:translateY(20px);filter:blur(7px);transition:opacity .75s var(--ease),transform .75s var(--ease),filter .75s var(--ease)}
+.rv.in{opacity:1;transform:none;filter:blur(0)}
+
+.keys{position:fixed;right:22px;bottom:22px;z-index:120;width:min(330px,calc(100vw - 44px));padding:16px 18px;border-radius:var(--radius);border:1px solid var(--line-2);background:color-mix(in srgb,var(--ink-2) 92%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 30px 70px -30px rgba(0,0,0,.8);animation:modalIn .3s var(--ease)}
+.keys h3{margin:0 0 11px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3)}
+.keys ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.keys li{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--text-2)}
+.keys kbd{font-family:inherit;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;border:1px solid var(--line-2);background:var(--glass);color:var(--text)}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;filter:none}.card-media::before{animation:none}}

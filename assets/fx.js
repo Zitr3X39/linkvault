@@ -427,3 +427,158 @@
   grid.addEventListener("pointerleave", drop, { passive: true });
   window.addEventListener("scroll", drop, { passive: true });
 })();
+
+/* ---- v6.3: scroll state, cursor press, empty-state reset ---- */
+(function () {
+  var root = document.documentElement, tick = 0;
+  function upd() {
+    tick = 0;
+    var y = window.pageYOffset || 0;
+    root.classList.toggle("is-scrolled", y > 24);
+    root.style.setProperty("--sy", String(Math.min(y, 700)));
+  }
+  window.addEventListener("scroll", function () {
+    if (!tick) tick = requestAnimationFrame(upd);
+  }, { passive: true });
+  upd();
+
+  document.addEventListener("pointerdown", function () { root.classList.add("is-down"); }, { passive: true });
+  document.addEventListener("pointerup", function () { root.classList.remove("is-down"); }, { passive: true });
+  document.addEventListener("pointercancel", function () { root.classList.remove("is-down"); }, { passive: true });
+})();
+
+(function () {
+  var box = document.getElementById("empty");
+  if (!box) return;
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn btn-ghost btn-reset";
+  btn.textContent = "Сбросить фильтры";
+  btn.hidden = true;
+  btn.addEventListener("click", function () { window.location.href = window.location.pathname; });
+  box.appendChild(btn);
+  function upd() {
+    var p = new URLSearchParams(window.location.search);
+    var on = ["q", "cat", "src", "fav"].some(function (k) {
+      var v = p.get(k);
+      return !!v && v !== "all" && v !== "";
+    });
+    btn.hidden = !(on && !box.hidden);
+  }
+  new MutationObserver(upd).observe(box, { attributes: true, attributeFilter: ["hidden"] });
+  window.addEventListener("popstate", upd);
+  document.addEventListener("click", function () { setTimeout(upd, 70); }, { passive: true });
+  setTimeout(upd, 300);
+})();
+
+/* ---- v6.4: cursor label, section reveals, hotkeys, quick paste ---- */
+(function () {
+  var root = document.documentElement;
+  if (matchMedia("(hover: none)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var lab = document.createElement("div");
+  lab.className = "cursor-label";
+  lab.setAttribute("aria-hidden", "true");
+  document.body.appendChild(lab);
+  var lx = -200, ly = -200, tx = -200, ty = -200;
+  function textFor(t) {
+    if (!t || !t.closest) return "";
+    if (t.closest('[data-action="fav"]')) return "В избранное";
+    if (t.closest('[data-action="edit"]')) return "Правка";
+    if (t.closest(".card-title a")) return "Открыть";
+    if (t.closest(".card")) return "Открыть";
+    if (t.closest(".accent-dot")) return "Цвет";
+    if (t.closest(".nav-item")) return "Фильтр";
+    return "";
+  }
+  document.addEventListener("pointermove", function (e) {
+    tx = e.clientX; ty = e.clientY + 32;
+    var txt = textFor(e.target);
+    if (txt) { if (lab.textContent !== txt) lab.textContent = txt; root.classList.add("is-label"); }
+    else root.classList.remove("is-label");
+  }, { passive: true });
+  document.addEventListener("pointerleave", function () { root.classList.remove("is-label"); });
+  (function loop() {
+    lx += (tx - lx) * 0.22; ly += (ty - ly) * 0.22;
+    lab.style.transform = "translate(" + lx.toFixed(1) + "px," + ly.toFixed(1) + "px) translate(-50%,-50%)";
+    requestAnimationFrame(loop);
+  })();
+})();
+
+(function () {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+  var sel = [".hero-sub", ".stats", ".content-head", ".sidebar-foot", ".nav-title"];
+  var io = new IntersectionObserver(function (rows) {
+    rows.forEach(function (r) {
+      if (r.isIntersecting) { r.target.classList.add("in"); io.unobserve(r.target); }
+    });
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
+  sel.forEach(function (q, i) {
+    document.querySelectorAll(q).forEach(function (n) {
+      n.classList.add("rv");
+      n.style.transitionDelay = (i * 70) + "ms";
+      io.observe(n);
+    });
+  });
+})();
+
+(function () {
+  var sheet = null;
+  var rows = [["/", "Поиск"], ["Ctrl K", "Командная палитра"], ["N", "Добавить ссылку"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
+  function toggleSheet() {
+    if (sheet) { sheet.remove(); sheet = null; return; }
+    sheet = document.createElement("div");
+    sheet.className = "keys";
+    sheet.innerHTML = "<h3>Горячие клавиши</h3><ul>" + rows.map(function (r) {
+      return "<li><span>" + r[1] + "</span><kbd>" + r[0] + "</kbd></li>";
+    }).join("") + "</ul>";
+    document.body.appendChild(sheet);
+  }
+  function busy() {
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
+    if (document.querySelector("dialog[open]")) return true;
+    var c = document.getElementById("cmdk");
+    return !!(c && !c.hidden);
+  }
+  function hit(id) { var b = document.getElementById(id); if (b) b.click(); }
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "?" || (e.shiftKey && e.key === "/")) { if (!busy()) { e.preventDefault(); toggleSheet(); } return; }
+    if (busy()) return;
+    var k = e.key.toLowerCase();
+    if (k === "n") { e.preventDefault(); hit("btnAdd"); }
+    else if (k === "f") { e.preventDefault(); hit("btnFav"); }
+    else if (k === "t") { e.preventDefault(); hit("btnTheme"); }
+    else if (e.key === "Escape") {
+      if (sheet) { sheet.remove(); sheet = null; return; }
+      if (window.location.search) window.location.href = window.location.pathname;
+    }
+  });
+  document.addEventListener("paste", function (e) {
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    if (document.querySelector("dialog[open]")) return;
+    var cd = e.clipboardData || window.clipboardData;
+    var txt = cd ? cd.getData("text") : "";
+    if (!txt || !/https?:\/\//i.test(txt)) return;
+    e.preventDefault();
+    hit("btnAdd");
+    setTimeout(function () {
+      var ta = document.getElementById("addText");
+      if (ta) { ta.value = txt.trim(); ta.focus(); }
+    }, 70);
+  });
+})();
+
+(function () {
+  var root = document.documentElement, box = document.getElementById("setPreviews");
+  var off = false;
+  try { off = localStorage.getItem("lv.previews") === "0"; } catch (e) {}
+  root.classList.toggle("no-previews", off);
+  if (!box) return;
+  box.checked = !off;
+  box.addEventListener("change", function () {
+    root.classList.toggle("no-previews", !box.checked);
+    try { localStorage.setItem("lv.previews", box.checked ? "1" : "0"); } catch (e) {}
+  });
+})();

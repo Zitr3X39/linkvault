@@ -252,14 +252,37 @@
     }
   }
 
+  function mediaSrc(u) {
+    try {
+      var url = new URL(u);
+      var h = url.hostname.replace(/^www\./, "");
+      var yt = null;
+      if (h === "youtu.be") yt = url.pathname.slice(1);
+      else if (/(^|\.)youtube\.com$/.test(h)) yt = url.searchParams.get("v") || (url.pathname.match(/\/(shorts|embed|live)\/([\w-]+)/) || [])[2] || null;
+      if (yt) return "https://i.ytimg.com/vi/" + yt + "/hqdefault.jpg";
+      if (h === "github.com") {
+        var seg = url.pathname.split("/").filter(Boolean);
+        if (seg.length >= 2) return "https://opengraph.githubassets.com/1/" + seg[0] + "/" + seg[1];
+      }
+      if (h === "t.me" || h === "tiktok.com" || h === "vm.tiktok.com") return "";
+      return "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(url.origin + url.pathname) + "?w=640&h=360";
+    } catch (e) { return ""; }
+  }
+
   function cardHtml(it) {
     const cat = catInfo(it.category || "other");
     const tags = (it.tags || []).slice(0, 3).map((t) => '<span class="tag tag-plain">#' + esc(t) + "</span>").join("");
     const stars = it.stars ? '<span class="stars">★ ' + (it.stars >= 1000 ? (it.stars / 1000).toFixed(1).replace(".", ",") + "k" : nf.format(it.stars)) + "</span>" : "";
     const note = it.note ? '<p class="card-note">' + esc(it.note) + "</p>" : "";
     const desc = it.description ? '<p class="card-desc">' + esc(it.description) + "</p>" : "";
+    const psrc = mediaSrc(it.url);
+    const letter = esc(String(it.title || it.domain || "?").trim().charAt(0).toUpperCase() || "?");
+    const media = psrc
+      ? '<div class="card-media" data-letter="' + letter + '"><img src="' + esc(psrc) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add(&quot;is-on&quot;);this.parentNode.classList.add(&quot;is-ready&quot;)" onerror="var m=this.parentNode;m.classList.add(&quot;is-ready&quot;,&quot;is-fallback&quot;);this.remove()"></div>'
+      : '<div class="card-media is-ready is-fallback" data-letter="' + letter + '"></div>';
     return (
       '<article class="card" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
+        media +
         '<div class="card-top">' +
           '<h3 class="card-title"><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.title || guessTitle(it.url)) + "</a></h3>" +
           '<div class="card-actions">' +
