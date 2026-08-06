@@ -277,8 +277,8 @@
     { id: "lime", name: "Лайм", c: "#D8FF4A" }
   ];
   var root = document.documentElement;
-  var cur = "violet";
-  try { cur = localStorage.getItem("lv.accent") || "violet"; } catch (e) {}
+  var cur = "mono";
+  try { cur = localStorage.getItem("lv.accent") || "mono"; } catch (e) {}
   root.setAttribute("data-accent", cur);
 
   var host = document.querySelector(".topbar-actions");
@@ -308,4 +308,122 @@
     wrap.appendChild(b);
   });
   host.insertBefore(wrap, host.firstChild);
+})();
+
+/* ---------- v6 motion pipeline ---------- */
+(function () {
+  "use strict";
+  var doc = document, root = doc.documentElement;
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  var veil = doc.createElement("div");
+  veil.className = "blur-veil";
+  veil.setAttribute("aria-hidden", "true");
+  [[2, "0%", "52%"], [5, "20%", "70%"], [10, "44%", "88%"], [18, "64%", "100%"]].forEach(function (l) {
+    var s = doc.createElement("span");
+    s.style.setProperty("--b", l[0] + "px");
+    s.style.setProperty("--s", l[1]);
+    s.style.setProperty("--e", l[2]);
+    veil.appendChild(s);
+  });
+  if (!reduce) doc.body.appendChild(veil);
+
+  if (fine && !reduce) {
+    var dot = doc.createElement("div"), ring = doc.createElement("div");
+    dot.className = "cursor-dot"; ring.className = "cursor-ring";
+    dot.setAttribute("aria-hidden", "true"); ring.setAttribute("aria-hidden", "true");
+    doc.body.appendChild(dot); doc.body.appendChild(ring);
+    var tx = -100, ty = -100, rx = -100, ry = -100;
+    doc.addEventListener("pointermove", function (e) {
+      tx = e.clientX; ty = e.clientY;
+      root.classList.add("is-cursor");
+      var hot = e.target.closest && e.target.closest("a,button,.card,input,select,textarea,.accent-dot");
+      root.classList.toggle("is-hot", !!hot);
+    }, { passive: true });
+    doc.addEventListener("pointerleave", function () { root.classList.remove("is-cursor"); });
+    (function loop() {
+      rx += (tx - rx) * 0.18; ry += (ty - ry) * 0.18;
+      dot.style.transform = "translate(" + tx + "px," + ty + "px) translate(-50%,-50%)";
+      ring.style.transform = "translate(" + rx + "px," + ry + "px) translate(-50%,-50%)";
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  var grid = doc.getElementById("grid"), swapTimer = null;
+  function swap() {
+    if (!grid || reduce) return;
+    grid.classList.add("is-swapping");
+    clearTimeout(swapTimer);
+    swapTimer = setTimeout(function () { grid.classList.remove("is-swapping"); }, 240);
+  }
+  doc.addEventListener("click", function (e) {
+    if (e.target.closest && e.target.closest(".nav-item,.chip-toggle")) swap();
+  });
+  var sortSel = doc.getElementById("sort");
+  if (sortSel) sortSel.addEventListener("change", swap);
+
+  ["navCategories", "navSources"].forEach(function (id) {
+    var host = doc.getElementById(id);
+    if (!host || reduce) return;
+    var done = false;
+    new MutationObserver(function () {
+      if (done) return;
+      var items = host.querySelectorAll(".nav-item");
+      if (!items.length) return;
+      done = true;
+      for (var i = 0; i < items.length; i++) {
+        items[i].style.animationDelay = (i * 35) + "ms";
+        items[i].classList.add("rise");
+      }
+    }).observe(host, { childList: true });
+  });
+
+  var brand = doc.querySelector(".brand-text strong");
+  if (brand && !reduce) {
+    var target = brand.textContent, pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&/|<>", frame = 0;
+    var iv = setInterval(function () {
+      frame++;
+      var out = "";
+      for (var i = 0; i < target.length; i++) {
+        out += (frame / 2.4 > i) ? target[i] : pool[Math.floor(Math.random() * pool.length)];
+      }
+      brand.textContent = out;
+      if (frame / 2.4 > target.length) { clearInterval(iv); brand.textContent = target; }
+    }, 48);
+  }
+})();
+
+/* ---- v6.1: 3D tilt on cards ---- */
+(function () {
+  if (matchMedia("(hover: none)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var grid = document.getElementById("grid");
+  if (!grid) return;
+  var cur = null, raf = 0, px = 0, py = 0;
+  function drop() {
+    if (!cur) return;
+    cur.classList.remove("tilt");
+    cur.style.removeProperty("--rx");
+    cur.style.removeProperty("--ry");
+    cur = null;
+  }
+  function apply() {
+    raf = 0;
+    if (!cur) return;
+    var r = cur.getBoundingClientRect();
+    var x = (px - r.left) / r.width - 0.5;
+    var y = (py - r.top) / r.height - 0.5;
+    cur.style.setProperty("--ry", (x * 7).toFixed(2) + "deg");
+    cur.style.setProperty("--rx", (-y * 6).toFixed(2) + "deg");
+    cur.classList.add("tilt");
+  }
+  grid.addEventListener("pointermove", function (e) {
+    var c = e.target && e.target.closest ? e.target.closest(".card") : null;
+    if (!c) { drop(); return; }
+    if (cur && cur !== c) drop();
+    cur = c; px = e.clientX; py = e.clientY;
+    if (!raf) raf = requestAnimationFrame(apply);
+  }, { passive: true });
+  grid.addEventListener("pointerleave", drop, { passive: true });
+  window.addEventListener("scroll", drop, { passive: true });
 })();

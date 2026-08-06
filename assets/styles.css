@@ -394,7 +394,8 @@ body{
 .topbar-actions{position:relative;z-index:1}
 
 /* ===== v5.4: kill horizontal overflow on small screens ===== */
-html,body{max-width:100%;overflow-x:hidden}
+/* overflow-x:hidden breaks position:sticky - clip does not */
+html,body{max-width:100%;overflow-x:clip}
 @media (max-width:1100px){
   .layout{grid-template-columns:minmax(0,1fr)}
   .sidebar,.content,.nav,.sidebar-foot,.grid,.content-head{min-width:0;max-width:100%}
@@ -407,3 +408,93 @@ html,body{max-width:100%;overflow-x:hidden}
   .card-meta{flex-wrap:wrap}
   .stats{flex-wrap:wrap}
 }
+
+/* ================= v6: mono-first + motion pipeline ================= */
+:root[data-accent="mono"]{--accent:#F4F5F7;--accent-2:#B9BEC9;--accent-3:#7C8496;--accent-ink:#0A0B0E}
+[data-theme="light"][data-accent="mono"]{--accent:#15171D;--accent-2:#454B5A;--accent-3:#8A91A0;--accent-ink:#FFFFFF}
+:root[data-accent="mono"] .blob{filter:saturate(0)}
+:root[data-accent="mono"] .blob-1{opacity:.13}
+:root[data-accent="mono"] .blob-2{opacity:.11}
+:root[data-accent="mono"] .blob-3{opacity:.09}
+
+/* progressive blur: content melts into the header */
+.blur-veil{position:fixed;left:0;right:0;top:0;height:130px;z-index:35;pointer-events:none}
+.blur-veil span{position:absolute;inset:0;-webkit-backdrop-filter:blur(var(--b));backdrop-filter:blur(var(--b));-webkit-mask-image:linear-gradient(to bottom,#000 var(--s),transparent var(--e));mask-image:linear-gradient(to bottom,#000 var(--s),transparent var(--e))}
+
+/* inverted cursor follower */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;z-index:90;pointer-events:none;border-radius:50%;mix-blend-mode:difference;opacity:0;transition:opacity .3s var(--ease)}
+.cursor-dot{width:6px;height:6px;background:#fff}
+.cursor-ring{width:32px;height:32px;border:1px solid rgba(255,255,255,.5);transition:width .28s var(--spring),height .28s var(--spring),border-color .28s,opacity .3s}
+.is-cursor .cursor-dot,.is-cursor .cursor-ring{opacity:1}
+.is-cursor.is-hot .cursor-ring{width:54px;height:54px;border-color:rgba(255,255,255,.95)}
+@media (hover:none),(pointer:coarse){.cursor-dot,.cursor-ring{display:none}}
+
+/* kinetic type: blur-in words */
+.hero-title .w{animation-name:wordBlurIn;animation-duration:.95s}
+@keyframes wordBlurIn{from{opacity:0;transform:translateY(28px) rotate(1.5deg);filter:blur(16px)}to{opacity:1;transform:none;filter:blur(0)}}
+.hero-sub{animation-name:wordBlurIn}
+
+/* cards: blur reveal + swap transition */
+.card.reveal{opacity:0;transform:translateY(28px) scale(.98);filter:blur(9px);transition:opacity .75s var(--ease),transform .75s var(--ease),filter .75s var(--ease)}
+.card.reveal.in{opacity:1;transform:none;filter:blur(0)}
+.grid{transition:opacity .34s var(--ease),filter .34s var(--ease),transform .34s var(--ease)}
+.grid.is-swapping{opacity:.2;filter:blur(12px);transform:scale(.985);transition-duration:.16s}
+
+/* brand mark: light sweep + ring pulse */
+.brand-mark{overflow:hidden}
+.brand-mark::after{content:"";position:absolute;top:-60%;left:-130%;width:55%;height:220%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);transform:rotate(18deg);animation:shine 6s var(--ease) infinite}
+@keyframes shine{0%,74%{left:-130%}100%{left:170%}}
+.brand-text strong{font-variant-ligatures:none}
+
+/* sidebar entrance */
+.nav-item.rise{opacity:0;transform:translateX(-12px);animation:riseIn .55s var(--ease) forwards}
+@keyframes riseIn{to{opacity:1;transform:none}}
+
+/* stat tiles */
+.stat{transition:transform .3s var(--spring),border-color .3s var(--ease),background .3s var(--ease)}
+.stat:hover{transform:translateY(-3px);border-color:var(--line-2)}
+
+@media (prefers-reduced-motion:reduce){
+  .brand-mark::after{animation:none}
+  .hero-title .w,.hero-sub{animation:none;opacity:1;filter:none;transform:none}
+  .card.reveal{opacity:1;transform:none;filter:none}
+  .grid.is-swapping{opacity:1;filter:none;transform:none}
+  .blur-veil{display:none}
+}
+
+/* ================= v6.1 - glass header, 3D cards, intro ================= */
+/* Header becomes real glass: the progressive blur veil does the heavy lifting */
+.topbar::before{background:color-mix(in srgb,var(--ink) 50%,transparent);backdrop-filter:blur(12px) saturate(150%);-webkit-backdrop-filter:blur(12px) saturate(150%)}
+.topbar.is-stuck::before{background:color-mix(in srgb,var(--ink) 64%,transparent);backdrop-filter:blur(22px) saturate(175%);-webkit-backdrop-filter:blur(22px) saturate(175%)}
+.blur-veil{height:170px}
+
+/* 3D tilt + glow in the card's own category colour */
+.grid{perspective:1250px}
+.card{transform-style:preserve-3d}
+.card-title,.card-actions,.card-desc,.card-meta{transition:transform .4s var(--ease)}
+#grid .card.tilt{transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translate3d(0,-6px,0);border-color:color-mix(in srgb,var(--cat,#8B8B86) 45%,var(--line-2));box-shadow:0 34px 70px -30px rgba(0,0,0,.8),0 0 0 1px var(--line-2),0 0 54px -16px color-mix(in srgb,var(--cat,#8B8B86) 60%,transparent)}
+[data-theme="light"] #grid .card.tilt{box-shadow:0 28px 58px -28px rgba(18,20,26,.30),0 0 0 1px color-mix(in srgb,var(--cat,#8B8B86) 28%,transparent),0 0 44px -18px color-mix(in srgb,var(--cat,#8B8B86) 55%,transparent)}
+#grid .card.tilt .card-title{transform:translate3d(0,0,30px)}
+#grid .card.tilt .card-actions{transform:translate3d(0,0,34px)}
+#grid .card.tilt .card-desc{transform:translate3d(0,0,18px)}
+#grid .card.tilt .card-meta{transform:translate3d(0,0,12px)}
+
+/* Intro curtain */
+.intro{position:fixed;inset:0;z-index:300;display:grid;place-items:center;background:var(--ink)}
+.intro::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 420px at 50% 46%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 72%);animation:introGlow 1.8s var(--ease) both}
+.intro-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px}
+.intro-mark{width:76px;height:76px;display:grid;place-items:center;border-radius:22px;border:1px solid var(--line-2);background:var(--glass);color:var(--text);animation:introMark .85s var(--spring) both}
+.intro-name{display:flex;gap:.08em;font-size:clamp(24px,4.2vw,40px);font-weight:800;letter-spacing:.18em;color:var(--text)}
+.intro-name span{opacity:0;animation:introChar .55s var(--ease) both}
+.intro-bar{position:relative;width:160px;height:2px;border-radius:2px;background:var(--line);overflow:hidden}
+.intro-bar i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:introBar 1.15s var(--ease) .15s forwards}
+.intro.is-out{animation:introOut .72s var(--ease) forwards}
+@keyframes introGlow{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes introMark{from{opacity:0;transform:translateY(18px) scale(.82) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes introChar{from{opacity:0;filter:blur(10px);transform:translateY(14px)}to{opacity:1;filter:blur(0);transform:none}}
+@keyframes introBar{to{width:100%}}
+@keyframes introOut{to{opacity:0;transform:scale(1.05);filter:blur(16px);visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.intro{display:none}#grid .card.tilt{transform:none;box-shadow:none}}
+
+/* v6.2: keep the progressive blur off the sticky sidebar */
+@media (min-width:1101px){.blur-veil{left:calc(max(20px,(100% - 1560px) / 2) + 290px)}}
