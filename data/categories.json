@@ -2,10 +2,15 @@
  "categories": [
   { "id": "video", "name": "Видео / YouTube", "color": "#FF6B57" },
   { "id": "vibecoding", "name": "Вайб-кодинг / AI", "color": "#A78BFA" },
+  { "id": "ai-skills", "name": "AI-скиллы", "color": "#E879F9" },
   { "id": "prompts", "name": "Промты", "color": "#F2A03D" },
   { "id": "design", "name": "Дизайн / монтаж", "color": "#F472B6" },
+  { "id": "3d", "name": "3D / рендер", "color": "#22D3EE" },
   { "id": "gamedev", "name": "Геймдев", "color": "#34D399" },
+  { "id": "extensions", "name": "Расширения браузера", "color": "#F97316" },
+  { "id": "music", "name": "Музыка / аудио", "color": "#FB7185" },
   { "id": "automation", "name": "Автоматизация", "color": "#38BDF8" },
+  { "id": "osint", "name": "OSINT / безопасность", "color": "#EF4444" },
   { "id": "tools", "name": "Софт / утилиты", "color": "#94A3B8" },
   { "id": "learning", "name": "Обучение / языки", "color": "#FACC15" },
   { "id": "marketing", "name": "Маркетинг / SMM", "color": "#C08457" },
@@ -22,6 +27,31 @@
  },
  "rules": [
   {
+   "cat": "ai-skills",
+   "domains": ["skills.sh", "skillsmp.com", "agentskills.io"],
+   "words": ["скилл", "skill.md", "agent skill", "claude skill"]
+  },
+  {
+   "cat": "3d",
+   "domains": ["threejs.org", "spline.design", "blender.org", "sketchfab.com", "poly.pizza", "market.pmnd.rs"],
+   "words": ["3d", "рендер", "render", "three.js", "threejs", "webgl", "модель 3д"]
+  },
+  {
+   "cat": "extensions",
+   "domains": ["chromewebstore.google.com", "chrome.google.com", "addons.mozilla.org", "microsoftedge.microsoft.com"],
+   "words": ["расширени", "extension", "плагин для браузера"]
+  },
+  {
+   "cat": "music",
+   "domains": ["spotify.com", "soundcloud.com", "music.youtube.com", "bandcamp.com", "deezer.com", "music.apple.com"],
+   "words": ["музык", "music", "плеер", "аудио плеер", "треки", "плейлист"]
+  },
+  {
+   "cat": "osint",
+   "domains": ["osintframework.com", "haveibeenpwned.com", "shodan.io", "intelx.io"],
+   "words": ["osint", "осинт", "разведк", "поиск аккаунт", "пробив", "deanon"]
+  },
+  {
    "cat": "video",
    "domains": ["youtube.com", "youtu.be", "tiktok.com", "vimeo.com", "rutube.ru", "twitch.tv", "capcut.com", "elevenlabs.io", "descript.com", "opus.pro", "submagic.co", "viewstats.com", "vidiq.com", "tubebuddy.com", "heygen.com", "runwayml.com", "pika.art", "kapwing.com"],
    "words": ["видео", "ролик", "шортс", "shorts", "reels", "рилс", "монтаж", "озвучка", "голос", "voice", "субтитры", "стрим", "канал", "youtube", "тикток"]
@@ -33,18 +63,18 @@
   },
   {
    "cat": "prompts",
-   "domains": ["promptingguide.ai", "promptbase.com", "flowgpt.com", "promptperfect.jina.ai", "snackprompt.com", "promptheroes.ai", "prompthero.com"],
+   "domains": ["promptingguide.ai", "promptbase.com", "flowgpt.com", "promptperfect.jina.ai", "snackprompt.com", "promptheroes.ai", "prompthero.com", "motionsites.ai"],
    "words": ["промт", "промпт", "prompt", "шаблон запрос", "system prompt", "jailbreak", "инструкции для гпт"]
   },
   {
    "cat": "design",
-   "domains": ["figma.com", "dribbble.com", "behance.net", "canva.com", "framer.com", "webflow.com", "coolors.co", "fonts.google.com", "unsplash.com", "pexels.com", "lottiefiles.com", "spline.design", "blender.org", "photopea.com", "removebg.com", "remove.bg", "icons8.com", "heroicons.com", "lucide.dev", "uiverse.io", "mobbin.com", "godly.website", "land-book.com"],
+   "domains": ["figma.com", "dribbble.com", "behance.net", "canva.com", "framer.com", "webflow.com", "coolors.co", "fonts.google.com", "unsplash.com", "pexels.com", "lottiefiles.com", "photopea.com", "removebg.com", "remove.bg", "icons8.com", "heroicons.com", "lucide.dev", "uiverse.io", "mobbin.com", "godly.website", "land-book.com"],
    "words": ["дизайн", "design", "ui", "ux", "шрифт", "font", "иконк", "icon", "макет", "палитр", "цвета", "анимаци", "логотип", "мокап", "mockup", "текстур"]
   },
   {
    "cat": "gamedev",
-   "domains": ["godotengine.org", "unity.com", "unrealengine.com", "itch.io", "gamedev.ru", "opengameart.org", "kenney.nl", "construct.net", "gdevelop.io", "defold.com", "rpgmakerweb.com", "steamworks.com"],
-   "words": ["геймдев", "gamedev", "играется", "движок", "engine", "unity", "unreal", "godot", "пиксель-арт", "спрайт", "sprite", "shader", "шейдер", "уровни игры", "геймплей"]
+   "domains": ["godotengine.org", "unity.com", "unrealengine.com", "itch.io", "gamedev.ru", "opengameart.org", "kenney.nl", "construct.net", "gdevelop.io", "defold.com", "rpgmakerweb.com", "steamworks.com", "curseforge.com", "modrinth.com"],
+   "words": ["геймдев", "gamedev", "играется", "движок", "engine", "unity", "unreal", "godot", "пиксель-арт", "спрайт", "sprite", "shader", "шейдер", "уровни игры", "геймплей", "мод для", "minecraft"]
   },
   {
    "cat": "automation",
@@ -54,7 +84,7 @@
   {
    "cat": "tools",
    "domains": ["obsproject.com", "7-zip.org", "notepad-plus-plus.org", "rufus.ie", "ventoy.net", "sumatrapdfreader.org", "portableapps.com", "ninite.com", "voidtools.com", "sysinternals.com", "qbittorrent.org", "vlc.org", "videolan.org", "handbrake.fr", "ffmpeg.org", "obsidian.md", "localsend.org", "winscp.net", "putty.org"],
-   "words": ["утилит", "программ", "софт", "software", "tool", "cli", "конвертер", "downloader", "скачать видео", "архиватор", "бэкап", "backup", "windows"]
+   "words": ["утилит", "программ", "софт", "software", "tool", "конвертер", "downloader", "скачать видео", "архиватор", "бэкап", "backup", "windows"]
   },
   {
    "cat": "learning",
@@ -63,8 +93,8 @@
   },
   {
    "cat": "marketing",
-   "domains": ["ahrefs.com", "semrush.com", "similarweb.com", "buffer.com", "later.com", "metricool.com", "tgstat.ru", "telemetr.io", "popsters.ru", "mailchimp.com", "sendpulse.com", "unisender.com", "yandex.ru", "analytics.google.com"],
-   "words": ["маркетинг", "smm", "seo", "трафик", "реклам", "ads", "воронк", "ключевые слов", "keyword", "аналитик", "охват", "продвижени", "монетизаци"]
+   "domains": ["ahrefs.com", "semrush.com", "similarweb.com", "buffer.com", "later.com", "metricool.com", "tgstat.ru", "telemetr.io", "popsters.ru", "mailchimp.com", "sendpulse.com", "unisender.com", "yandex.ru", "analytics.google.com", "gisfind.online"],
+   "words": ["маркетинг", "smm", "seo", "трафик", "реклам", "ads", "воронк", "ключевые слов", "keyword", "аналитик", "охват", "продвижени", "монетизаци", "лиды", "лидогенерац"]
   }
  ]
 }
