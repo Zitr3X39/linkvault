@@ -7,15 +7,16 @@
 <meta name="description" content="MONOLITH — личное хранилище ссылок, репозиториев и каналов по категориям." />
 <meta name="theme-color" content="#0E0F13" media="(prefers-color-scheme: dark)" />
 <meta name="theme-color" content="#FBF9F5" media="(prefers-color-scheme: light)" />
+<link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230A0B0E'/%3E%3Crect x='19' y='9' width='26' height='46' rx='6' fill='none' stroke='%23F4F5F7' stroke-width='4.2'/%3E%3Crect x='27' y='20' width='10' height='4' rx='2' fill='%23F4F5F7'/%3E%3Crect x='27' y='30' width='10' height='4' rx='2' fill='%23F4F5F7'/%3E%3Crect x='27' y='40' width='6' height='4' rx='2' fill='%23F4F5F7'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="assets/styles.css?v=11" />
+<link rel="stylesheet" href="assets/styles.css?v=14" />
 </head>
 <body>
-  <div class="intro" id="intro" aria-hidden="true"><div class="intro-inner"><div class="intro-mark"><svg viewBox="0 0 32 32" width="40" height="40" fill="none"><rect x="9.4" y="4" width="13.2" height="24" rx="3.2" stroke="currentColor" stroke-width="2"/><rect x="13.3" y="9.2" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="14.1" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="19" width="3.2" height="2.1" rx="1.05" fill="currentColor"/></svg></div><div class="intro-name" translate="no"><span style="animation-delay:360ms">M</span><span style="animation-delay:430ms">O</span><span style="animation-delay:500ms">N</span><span style="animation-delay:570ms">O</span><span style="animation-delay:640ms">L</span><span style="animation-delay:710ms">I</span><span style="animation-delay:780ms">T</span><span style="animation-delay:850ms">H</span></div><div class="intro-bar"><i></i></div></div></div>
-  <script>(function(){var el=document.getElementById("intro");if(!el)return;var seen=false;try{seen=!!sessionStorage.getItem("lv.intro");sessionStorage.setItem("lv.intro","1");}catch(e){}if(seen||matchMedia("(prefers-reduced-motion: reduce)").matches){el.remove();return;}setTimeout(function(){el.classList.add("is-out");setTimeout(function(){el.remove();},920);},2900);})();</script>
+  <div class="intro" id="intro" aria-hidden="true"><div class="intro-inner"><div class="intro-mark"><svg viewBox="0 0 32 32" width="40" height="40" fill="none"><rect x="9.4" y="4" width="13.2" height="24" rx="3.2" stroke="currentColor" stroke-width="2"/><rect x="13.3" y="9.2" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="14.1" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="19" width="3.2" height="2.1" rx="1.05" fill="currentColor"/></svg></div><div class="intro-name" translate="no"><span style="animation-delay:520ms">M</span><span style="animation-delay:640ms">O</span><span style="animation-delay:760ms">N</span><span style="animation-delay:880ms">O</span><span style="animation-delay:1000ms">L</span><span style="animation-delay:1120ms">I</span><span style="animation-delay:1240ms">T</span><span style="animation-delay:1360ms">H</span></div><div class="intro-bar"><i></i></div></div></div>
+  <script>(function(){var el=document.getElementById("intro");if(!el)return;var seen=false;try{seen=!!sessionStorage.getItem("lv.intro");sessionStorage.setItem("lv.intro","1");}catch(e){}if(seen||matchMedia("(prefers-reduced-motion: reduce)").matches){el.remove();return;}setTimeout(function(){el.classList.add("is-out");setTimeout(function(){el.remove();},920);},4200);})();</script>
 <a class="skip-link" href="#main">К содержимому</a>
 
 <div class="shell">
@@ -47,7 +48,7 @@
         <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M16 11.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 7.5 7.5Z" fill="currentColor"/></svg>
       </button>
       <button type="button" class="btn btn-icon" id="btnSettings" aria-label="Настройки синхронизации">
-        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M3 6.2h3.2M10 6.2H17M3 13.8h4.4M14.4 13.8H17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.1" cy="6.2" r="1.9" fill="currentColor"/><circle cx="11.3" cy="13.8" r="1.9" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.6.9 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.6 0-1.25.41-1.51 1Z"/></svg>
       </button>
     </div>
   </header>
@@ -63,6 +64,7 @@
         <button type="button" class="btn btn-ghost btn-block btn-recat btn-translate" id="btnTranslate">Перевести описания</button>
         <label class="side-check"><input type="checkbox" id="setPreviews" checked> Превью сайтов</label>
         <p class="hint" id="pendingHint" hidden></p>
+        <p class="hint ver-line">MONOLITH v13</p>
       </div>
     </aside>
 
@@ -91,6 +93,8 @@
         </div>
       </div>
 
+      <div class="chips" id="chips" aria-label="Быстрый фильтр по источнику"></div>
+
       <div class="grid" id="grid"><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article><article class="card skel"><span class="sk sk-media"></span><span class="sk sk-line w80"></span><span class="sk sk-line w55"></span></article></div>
 
       <div class="empty" id="empty" hidden>
@@ -108,7 +112,7 @@
       <h2 id="dlgAddTitle">Добавить ссылки</h2>
       <button type="button" class="btn btn-icon" data-close="dlgAdd" aria-label="Закрыть">✕</button>
     </div>
-    <p class="modal-hint">Вставь что угодно: одну ссылку, список или кусок переписки. Ссылки вытащатся сами, дубли отсекутся.</p>
+    <p class="modal-hint">Вставь что угодно: одну ссылку, список или кусок переписки. Ссылки вытащатся сами, дубли отсекутся и подсветятся.</p>
     <label class="sr-only" for="addText">Список ссылок</label>
     <textarea id="addText" name="addText" rows="9" spellcheck="false" placeholder="https://github.com/user/repo&#10;https://t.me/durov&#10;Супер тулза — https://cursor.com"></textarea>
     <div class="modal-foot">
@@ -195,7 +199,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="assets/app.js?v=11" defer></script>
-<script src="assets/fx.js?v=11" defer></script>
+<script src="assets/app.js?v=14" defer></script>
+<script src="assets/fx.js?v=14" defer></script>
 </body>
 </html>
