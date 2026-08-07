@@ -610,3 +610,12 @@ html::-webkit-scrollbar{width:0;height:0}
 .card-media.is-cover.has-img::after{right:10px;opacity:.1}
 .card-media .cover-shot{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;opacity:1;transform:none;padding:0;border:0;border-radius:inherit;background:var(--ink-3)}
 .card-media.is-cover.has-img .cover-fav,.card-media.is-cover.has-img .cover-title,.card-media.is-cover.has-img .cover-stars{display:none}
+
+/* ===== v13.2: prettier add-link dialog ===== */
+#dlgAdd{border:1px solid color-mix(in srgb,var(--accent) 32%,var(--line-2));box-shadow:0 30px 80px -28px rgba(0,0,0,.85),0 0 70px -18px color-mix(in srgb,var(--accent) 38%,transparent)}
+#dlgAdd .modal-head h2{background:linear-gradient(100deg,var(--text) 30%,color-mix(in srgb,var(--accent) 80%,var(--text)));-webkit-background-clip:text;background-clip:text;color:transparent}
+#dlgAdd textarea{min-height:180px;border-radius:14px;line-height:1.7;transition:border-color .25s var(--ease),box-shadow .3s var(--ease)}
+#dlgAdd textarea:focus{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 16%,transparent),0 0 34px -10px color-mix(in srgb,var(--accent) 32%,transparent)}
+#dlgAdd .modal-hint{font-size:13.5px}
+#dlgAdd .btn-primary{height:42px;padding:0 24px}
+#dlgAdd .check input{width:17px;height:17px}
