@@ -523,7 +523,6 @@
     if (t.closest('[data-action="edit"]')) return "Правка";
     if (t.closest("[data-feed-add]")) return "В хранилище";
     if (t.closest("[data-feed-copy]")) return "Скопировать ссылку";
-    if (t.closest("#btnRandom")) return "Случайная ссылка";
     if (t.closest(".card-title a")) return "Открыть";
     if (t.closest(".card")) return "Открыть";
     if (t.closest(".accent-dot")) return "Цвет";
@@ -566,7 +565,7 @@
 
 (function () {
   var sheet = null;
-  var rows = [["/", "Поиск"], ["A", "Добавить ссылку"], ["Ctrl K", "Командная палитра"], ["R", "Случайная ссылка"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
+  var rows = [["/", "Поиск"], ["A", "Добавить ссылку"], ["Ctrl K", "Командная палитра"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
   function toggleSheet() {
     if (sheet) { sheet.remove(); sheet = null; return; }
     sheet = document.createElement("div");
@@ -590,7 +589,6 @@
     if (busy()) return;
     var k = e.key.toLowerCase();
     if (k === "n") { e.preventDefault(); hit("btnAdd"); }
-    else if (k === "r") { e.preventDefault(); hit("btnRandom"); }
     else if (k === "f") { e.preventDefault(); hit("btnFav"); }
     else if (k === "t") { e.preventDefault(); hit("btnTheme"); }
     else if (e.key === "Escape") {
