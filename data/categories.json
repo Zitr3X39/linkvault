@@ -7,13 +7,34 @@
   { "id": "design", "name": "Дизайн / монтаж", "color": "#F472B6" },
   { "id": "3d", "name": "3D / рендер", "color": "#22D3EE" },
   { "id": "gamedev", "name": "Геймдев", "color": "#34D399" },
-  { "id": "extensions", "name": "Расширения браузера", "color": "#F97316" },
   { "id": "music", "name": "Музыка / аудио", "color": "#FB7185" },
   { "id": "automation", "name": "Автоматизация", "color": "#38BDF8" },
-  { "id": "osint", "name": "OSINT / безопасность", "color": "#EF4444" },
+  { "id": "osint", "name": "OSINT / разведка", "color": "#EF4444" },
   { "id": "tools", "name": "Софт / утилиты", "color": "#94A3B8" },
   { "id": "learning", "name": "Обучение / языки", "color": "#FACC15" },
   { "id": "marketing", "name": "Маркетинг / SMM", "color": "#C08457" },
+  { "id": "news", "name": "Новости", "color": "#FF9E64" },
+  { "id": "finance", "name": "Финансы / крипта", "color": "#4ADE80" },
+  { "id": "productivity", "name": "Продуктивность", "color": "#60A5FA" },
+  { "id": "business", "name": "Стартапы / бизнес", "color": "#F0B429" },
+  { "id": "health", "name": "Здоровье", "color": "#F87171" },
+  { "id": "science", "name": "Наука", "color": "#2DD4BF" },
+  { "id": "books", "name": "Книги / чтение", "color": "#D4A373" },
+  { "id": "podcasts", "name": "Подкасты", "color": "#C4B5FD" },
+  { "id": "photography", "name": "Фото / камера", "color": "#7DD3FC" },
+  { "id": "devops", "name": "DevOps / облако", "color": "#818CF8" },
+  { "id": "security", "name": "Безопасность", "color": "#E11D48" },
+  { "id": "opensource", "name": "Open Source", "color": "#A3E635" },
+  { "id": "templates", "name": "Шаблоны / ассеты", "color": "#FDA4AF" },
+  { "id": "fonts", "name": "Шрифты", "color": "#A5B4FC" },
+  { "id": "icons", "name": "Иконки", "color": "#67E8F9" },
+  { "id": "travel", "name": "Путешествия", "color": "#0EA5E9" },
+  { "id": "food", "name": "Еда / рецепты", "color": "#FB923C" },
+  { "id": "sports", "name": "Спорт", "color": "#BEF264" },
+  { "id": "shopping", "name": "Покупки / скидки", "color": "#D97706" },
+  { "id": "social", "name": "Соцсети", "color": "#F0ABFC" },
+  { "id": "memes", "name": "Мемы / фан", "color": "#FDE047" },
+  { "id": "communities", "name": "Сообщества / форумы", "color": "#FCA5A5" },
   { "id": "other", "name": "Разное", "color": "#8B8B86" }
  ],
  "types": {
@@ -23,6 +44,7 @@
   "youtube": "YouTube",
   "twitter": "X / Twitter",
   "reddit": "Reddit",
+  "extension": "Расширения",
   "site": "Сайт"
  },
  "rules": [
@@ -35,11 +57,6 @@
    "cat": "3d",
    "domains": ["threejs.org", "spline.design", "blender.org", "sketchfab.com", "poly.pizza", "market.pmnd.rs"],
    "words": ["3d", "рендер", "render", "three.js", "threejs", "webgl", "модель 3д"]
-  },
-  {
-   "cat": "extensions",
-   "domains": ["chromewebstore.google.com", "chrome.google.com", "addons.mozilla.org", "microsoftedge.microsoft.com"],
-   "words": ["расширени", "extension", "плагин для браузера"]
   },
   {
    "cat": "music",
@@ -93,8 +110,118 @@
   },
   {
    "cat": "marketing",
-   "domains": ["ahrefs.com", "semrush.com", "similarweb.com", "buffer.com", "later.com", "metricool.com", "tgstat.ru", "telemetr.io", "popsters.ru", "mailchimp.com", "sendpulse.com", "unisender.com", "yandex.ru", "analytics.google.com", "gisfind.online"],
+   "domains": ["ahrefs.com", "semrush.com", "similarweb.com", "buffer.com", "later.com", "metricool.com", "tgstat.ru", "telemetr.io", "popsters.ru", "mailchimp.com", "sendpulse.com", "unisender.com", "analytics.google.com", "gisfind.online"],
    "words": ["маркетинг", "smm", "seo", "трафик", "реклам", "ads", "воронк", "ключевые слов", "keyword", "аналитик", "охват", "продвижени", "монетизаци", "лиды", "лидогенерац"]
+  },
+  {
+   "cat": "news",
+   "domains": ["techcrunch.com", "theverge.com", "news.ycombinator.com", "habr.com", "vc.ru", "meduza.io", "bbc.com", "reuters.com", "tjournal.ru", "arstechnica.com"],
+   "words": ["новост", "news", "выпуск", "дайджест", "обзор недел"]
+  },
+  {
+   "cat": "finance",
+   "domains": ["binance.com", "coinbase.com", "coingecko.com", "coinmarketcap.com", "tradingview.com", "investing.com", "bybit.com", "okx.com", "tinkoff.ru"],
+   "words": ["крипт", "crypto", "bitcoin", "биткоин", "акци", "инвести", "биржа", "трейдинг", "финанс", "токен", "блокчейн"]
+  },
+  {
+   "cat": "productivity",
+   "domains": ["todoist.com", "ticktick.com", "trello.com", "asana.com", "clickup.com", "cron.com", "raindrop.io", "notion.so", "miro.com"],
+   "words": ["продуктивн", "productivity", "задачник", "todo", "заметки", "планировщик", "привычк", "тайм-менеджмент"]
+  },
+  {
+   "cat": "business",
+   "domains": ["producthunt.com", "crunchbase.com", "techcrunch.com/startups", "stripe.com/atlas"],
+   "words": ["стартап", "startup", "бизнес", "business", "saas", "mvp", "предприним", "монетизация проекта", "юнит-экономик"]
+  },
+  {
+   "cat": "health",
+   "domains": ["strava.com", "myfitnesspal.com", "whoop.com", "ouraring.com"],
+   "words": ["здоровь", "тренировк", "фитнес", "fitness", "диет", "медитац", "сон ", "wellness"]
+  },
+  {
+   "cat": "science",
+   "domains": ["nature.com", "science.org", "arxiv.org", "nplus1.ru", "popmech.ru", "elementy.ru"],
+   "words": ["наук", "science", "исследован", "космос", "физик", "биолог", "астроном"]
+  },
+  {
+   "cat": "books",
+   "domains": ["goodreads.com", "litres.ru", "livelib.ru", "bookmate.com", "author.today"],
+   "words": ["книг", "book", "чтение", "литератур", "роман", "бестселлер"]
+  },
+  {
+   "cat": "podcasts",
+   "domains": ["podcasts.apple.com", "open.spotify.com/show", "castbox.fm", "podcasts.google.com"],
+   "words": ["подкаст", "podcast", "эпизод", "выпуск подкаста"]
+  },
+  {
+   "cat": "photography",
+   "domains": ["flickr.com", "500px.com", "dpreview.com", "adobe.com/products/photoshop-lightroom"],
+   "words": ["фотограф", "фото", "камер", "photo", "снимок", "объектив", "lightroom"]
+  },
+  {
+   "cat": "devops",
+   "domains": ["kubernetes.io", "aws.amazon.com", "cloud.google.com", "azure.microsoft.com", "cloudflare.com", "netlify.com", "terraform.io", "grafana.com"],
+   "words": ["devops", "девопс", "деплой", "deploy", "ci/cd", "kubernetes", "облако", "cloud", "инфраструктур", "сервер"]
+  },
+  {
+   "cat": "security",
+   "domains": ["virustotal.com", "hackthebox.com", "tryhackme.com", "kali.org", "kaspersky.ru"],
+   "words": ["безопасност", "security", "уязвимост", "vulnerability", "взлом", "pentest", "шифрован", "парол"]
+  },
+  {
+   "cat": "opensource",
+   "domains": ["opensource.org", "github.com/topics", "gitlab.com/explore"],
+   "words": ["open source", "опенсорс", "открытый исходный", "foss"]
+  },
+  {
+   "cat": "templates",
+   "domains": ["gumroad.com", "creativemarket.com", "themeforest.net", "ui8.net", "envato.com"],
+   "words": ["шаблон", "template", "ассет", "asset", "ui kit", "набор для"]
+  },
+  {
+   "cat": "fonts",
+   "domains": ["fonts.adobe.com", "dafont.com", "myfonts.com", "fonts.google.com", "fontshare.com"],
+   "words": ["typeface", "гарнитур", "кириллический шрифт"]
+  },
+  {
+   "cat": "icons",
+   "domains": ["flaticon.com", "iconfinder.com", "thenounproject.com", "svgrepo.com"],
+   "words": ["icon set", "набор иконок", "svg иконки"]
+  },
+  {
+   "cat": "travel",
+   "domains": ["booking.com", "airbnb.com", "aviasales.ru", "skyscanner.com", "tripadvisor.com"],
+   "words": ["путешеств", "travel", "билет", "отель", "авиа", "виза"]
+  },
+  {
+   "cat": "food",
+   "domains": ["eda.ru", "food.ru", "allrecipes.com", "tasty.co"],
+   "words": ["рецепт", "recipe", "готовка", "кухня", "блюдо", "еда"]
+  },
+  {
+   "cat": "sports",
+   "domains": ["espn.com", "sports.ru", "championat.com", "strava.com"],
+   "words": ["спорт", "футбол", "хоккей", "матч", "бег", "марафон"]
+  },
+  {
+   "cat": "shopping",
+   "domains": ["aliexpress.com", "amazon.com", "ozon.ru", "wildberries.ru", "ebay.com"],
+   "words": ["скидк", "купить", "распродаж", "deal", "промокод", "маркетплейс"]
+  },
+  {
+   "cat": "social",
+   "domains": ["instagram.com", "facebook.com", "vk.com", "threads.net", "pinterest.com"],
+   "words": ["соцсет", "instagram", "инстаграм", "вконтакте"]
+  },
+  {
+   "cat": "memes",
+   "domains": ["9gag.com", "pikabu.ru", "joyreactor.cc", "coub.com"],
+   "words": ["мем", "meme", "прикол", "юмор"]
+  },
+  {
+   "cat": "communities",
+   "domains": ["stackoverflow.com", "discord.com", "discourse.org", "quora.com"],
+   "words": ["сообществ", "форум", "forum", "community", "дискорд", "discord", "чат"]
   }
  ]
 }
