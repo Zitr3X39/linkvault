@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updated_at": "2026-08-06T19:20:59.583Z",
+ "updated_at": "2026-08-07T10:44:03.407602+00:00",
  "items": [
   {
    "url": "https://github.com/p1ngul1n0/blackbird",
@@ -481,6 +481,22 @@
    "stars": 1413,
    "enriched": true,
    "added_at": "2026-08-06T09:23:05.321Z"
+  },
+  {
+   "url": "https://loecsen.com/",
+   "url_key": "loecsen.com/",
+   "title": "loecsen.com",
+   "description": "",
+   "note": "",
+   "domain": "loecsen.com",
+   "category": "other",
+   "type": "site",
+   "source": "Telegram-бот",
+   "tags": [],
+   "favorite": false,
+   "stars": 0,
+   "enriched": false,
+   "added_at": "2026-08-07T10:44:03.407436+00:00"
   }
  ]
 }
