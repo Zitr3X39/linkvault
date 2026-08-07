@@ -5,6 +5,12 @@
   const GH_API = PROTO + "api.github.com";
   const NOEMBED = PROTO + "noembed.com/embed?url=";
 
+  /* Когда будет создан Cloudflare Worker — вставь сюда его URL,
+     например: "https://linkvault-add.ТВОЙ_АККАУНТ.workers.dev".
+     Тогда кнопка «Добавить себе» в ленте пишет в репозиторий напрямую.
+     Пока пусто — добавление идёт через локальную очередь/токен GitHub. */
+  const WORKER_URL = "";
+
   const LS = {
     overlay: "lv.overlay.v1",
     theme: "lv.theme",
@@ -23,18 +29,42 @@
       { id: "design", name: "Дизайн / монтаж", color: "#F472B6" },
       { id: "3d", name: "3D / рендер", color: "#22D3EE" },
       { id: "gamedev", name: "Геймдев", color: "#34D399" },
-      { id: "extensions", name: "Расширения браузера", color: "#F97316" },
       { id: "music", name: "Музыка / аудио", color: "#FB7185" },
-      { id: "automation", name: "Автоматизация", color: "#38BDF8" },
-      { id: "osint", name: "OSINT / безопасность", color: "#EF4444" },
+      { id: "automation", name: "Автоматизация", "color": "#38BDF8" },
+      { id: "osint", name: "OSINT / разведка", color: "#EF4444" },
       { id: "tools", name: "Софт / утилиты", color: "#94A3B8" },
       { id: "learning", name: "Обучение / языки", color: "#FACC15" },
       { id: "marketing", name: "Маркетинг / SMM", color: "#C08457" },
+      { id: "news", name: "Новости", color: "#FF9E64" },
+      { id: "finance", name: "Финансы / крипта", color: "#4ADE80" },
+      { id: "productivity", name: "Продуктивность", color: "#60A5FA" },
+      { id: "business", name: "Стартапы / бизнес", color: "#F0B429" },
+      { id: "health", name: "Здоровье", color: "#F87171" },
+      { id: "science", name: "Наука", color: "#2DD4BF" },
+      { id: "books", name: "Книги / чтение", color: "#D4A373" },
+      { id: "podcasts", name: "Подкасты", color: "#C4B5FD" },
+      { id: "photography", name: "Фото / камера", color: "#7DD3FC" },
+      { id: "devops", name: "DevOps / облако", color: "#818CF8" },
+      { id: "security", name: "Безопасность", color: "#E11D48" },
+      { id: "opensource", name: "Open Source", color: "#A3E635" },
+      { id: "templates", name: "Шаблоны / ассеты", color: "#FDA4AF" },
+      { id: "fonts", name: "Шрифты", color: "#A5B4FC" },
+      { id: "icons", name: "Иконки", color: "#67E8F9" },
+      { id: "travel", name: "Путешествия", color: "#0EA5E9" },
+      { id: "food", name: "Еда / рецепты", color: "#FB923C" },
+      { id: "sports", name: "Спорт", color: "#BEF264" },
+      { id: "shopping", name: "Покупки / скидки", color: "#D97706" },
+      { id: "social", name: "Соцсети", color: "#F0ABFC" },
+      { id: "memes", name: "Мемы / фан", color: "#FDE047" },
+      { id: "communities", name: "Сообщества / форумы", color: "#FCA5A5" },
       { id: "other", name: "Разное", color: "#8B8B86" },
     ],
-    types: { github: "GitHub", telegram: "Telegram", tiktok: "TikTok", youtube: "YouTube", twitter: "X / Twitter", reddit: "Reddit", site: "Сайт" },
+    types: { github: "GitHub", telegram: "Telegram", tiktok: "TikTok", youtube: "YouTube", twitter: "X / Twitter", reddit: "Reddit", extension: "Расширения", site: "Сайт" },
     rules: [],
   };
+
+  const COPY_SVG = '<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><rect x="7" y="7" width="9" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 11V5a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const FLIP_SVG = '<svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M4 10a6 6 0 0 1 10.2-4.3M16 10a6 6 0 0 1-10.2 4.3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M14.5 2.5v3.2h-3.2M5.5 17.5v-3.2h3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   const state = {
     baseItems: [],
@@ -47,7 +77,11 @@
     baseSha: "",
     filters: { q: "", cat: "all", src: "all", sort: "new", fav: false },
     editingId: null,
+    tab: "vault",
+    feed: { items: [], loaded: false, updatedAt: null },
+    feedSrc: "all",
   };
+  const feedAdded = new Set();
 
   const $ = (id) => document.getElementById(id);
   const el = {};
@@ -120,6 +154,7 @@
     if (/(youtube\.com|youtu\.be)$/.test(d)) return "youtube";
     if (/(twitter\.com|x\.com)$/.test(d)) return "twitter";
     if (/reddit\.com$/.test(d)) return "reddit";
+    if (/(^|\.)(chromewebstore\.google\.com|microsoftedge\.microsoft\.com)$/.test(d) || /(^|\.)addons\.(mozilla\.org|opera\.com)$/.test(d)) return "extension";
     return "site";
   }
 
@@ -257,6 +292,11 @@
         if (enr.title && junk && !userEdits.title) base.title = enr.title;
         if (enr.description && !String(base.description || "").trim()) base.description = enr.description;
         if (enr.category && (base.category || "other") === "other" && !userEdits.category) base.category = enr.category;
+      }
+      /* v14: «Расширения» переехали из категорий в источники */
+      if (!userEdits.category && (base.category || "") === "extensions") {
+        base.type = "extension";
+        base.category = detectCategory(base.url, [base.title, base.description, base.note].join(" "));
       }
       merged.push(base);
     }
@@ -399,13 +439,15 @@
       starsCov +
       (psrc ? '<img class="cover-shot" src="' + esc(psrc) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : "") +
       "</div>";
-    return (
-      '<article class="card" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
+    const front =
+      '<div class="flip-front">' +
         media +
         '<div class="card-top">' +
           '<h3 class="card-title"><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(prettyTitle(it)) + "</a></h3>" +
           '<div class="card-actions">' +
             '<button type="button" class="icon-btn" data-action="fav" aria-pressed="' + (it.favorite ? "true" : "false") + '" aria-label="В избранное"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="m10 2.8 2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 8.1l5-.7z" fill="' + (it.favorite ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="1.4"/></svg></button>' +
+            '<button type="button" class="icon-btn" data-action="copy" aria-label="Скопировать ссылку">' + COPY_SVG + "</button>" +
+            '<button type="button" class="icon-btn" data-action="flip" aria-label="Перевернуть карточку">' + FLIP_SVG + "</button>" +
             '<button type="button" class="icon-btn" data-action="edit" aria-label="Изменить"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M13.4 3.6a1.9 1.9 0 0 1 2.7 2.7L7.6 14.8 4 16l1.2-3.6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>' +
           "</div>" +
         "</div>" +
@@ -416,6 +458,22 @@
           tags + stars +
           '<span class="domain" translate="no">' + esc(it.domain || domainOf(it.url)) + "</span>" +
         "</div>" +
+      "</div>";
+    const back =
+      '<div class="flip-back">' +
+        '<div class="back-title">' + esc(prettyTitle(it)) + "</div>" +
+        '<div class="back-desc">' + esc(it.description || it.note || "Описания пока нет — открой ссылку или добавь заметку через правку.") + "</div>" +
+        (it.note && it.description ? '<p class="card-note">' + esc(it.note) + "</p>" : "") +
+        '<div class="back-url" translate="no">' + esc(it.url) + "</div>" +
+        '<div class="back-actions">' +
+          '<button type="button" class="btn btn-primary" data-action="open">Открыть</button>' +
+          '<button type="button" class="btn" data-action="copy">Копировать</button>' +
+          '<button type="button" class="icon-btn" data-action="flip" aria-label="Назад">' + FLIP_SVG + "</button>" +
+        "</div>" +
+      "</div>";
+    return (
+      '<article class="card" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
+        '<div class="flip-inner">' + front + back + "</div>" +
       "</article>"
     );
   }
@@ -444,6 +502,144 @@
 
   function renderAll() { applyOverlay(); renderNav(); renderChips(); renderCards(); renderMeta(); }
 
+  /* ---------- tabs + feed ---------- */
+  function switchTab(tab) {
+    state.tab = tab === "feed" ? "feed" : "vault";
+    const isFeed = state.tab === "feed";
+    document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("is-on", b.dataset.tab === state.tab));
+    if (el.layout) el.layout.hidden = isFeed;
+    if (el.feedWrap) el.feedWrap.hidden = !isFeed;
+    if (isFeed && !state.feed.loaded) loadFeed();
+    if (isFeed) renderFeed();
+    syncUrl();
+  }
+
+  async function loadFeed() {
+    try {
+      const r = await fetch("data/feed.json?v=" + Date.now(), { cache: "no-store" });
+      if (r.ok) {
+        const j = await r.json();
+        state.feed.items = Array.isArray(j.items) ? j.items : [];
+        state.feed.updatedAt = j.updated_at || null;
+      }
+    } catch (e) { /* ленты ещё нет */ }
+    state.feed.loaded = true;
+    renderFeed();
+  }
+
+  function feedCardHtml(it, known) {
+    const cat = catInfo(it.category || "other");
+    const dom = it.domain || domainOf(it.url);
+    const favSrc = dom ? "https://icons.duckduckgo.com/ip3/" + dom + ".ico" : "";
+    const letter = esc(String(it.title || dom || "?").trim().charAt(0).toUpperCase() || "?");
+    const desc = it.description ? '<p class="feed-desc">' + esc(it.description) + "</p>" : "";
+    const score = it.score ? '<span class="feed-score">▲ ' + nf.format(it.score) + "</span>" : "";
+    const when = it.found_at ? '<span class="feed-score">' + esc(df.format(new Date(it.found_at))) + "</span>" : "";
+    const added = known[it.url_key] || feedAdded.has(it.url_key);
+    return (
+      '<article class="feed-card reveal" style="--cat:' + esc(cat.color) + '">' +
+        '<div class="feed-fav">' + (favSrc ? '<img src="' + esc(favSrc) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") + "<span>" + letter + "</span></div>" +
+        '<div class="feed-body">' +
+          '<h3 class="feed-title"><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.title || dom) + "</a></h3>" +
+          desc +
+          '<div class="feed-meta">' +
+            '<span class="feed-src">' + esc(it.source || "") + "</span>" +
+            '<span class="tag">' + esc(cat.name) + "</span>" +
+            '<span class="tag tag-plain">' + esc(typeLabel(it.type)) + "</span>" +
+            score + when +
+          "</div>" +
+        "</div>" +
+        '<div class="feed-actions">' +
+          '<button type="button" class="btn-icon" data-feed-copy="' + esc(it.url_key) + '" aria-label="Скопировать ссылку">' + COPY_SVG + "</button>" +
+          (added
+            ? '<button type="button" class="btn btn-sm is-done" disabled>В хранилище ✓</button>'
+            : '<button type="button" class="btn btn-primary btn-sm" data-feed-add="' + esc(it.url_key) + '">Добавить себе</button>') +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  function renderFeed() {
+    if (!el.feedList) return;
+    const items = state.feed.items;
+    const q = state.filters.q.trim().toLowerCase();
+    const srcs = [];
+    items.forEach((i) => { if (srcs.indexOf(i.source) < 0) srcs.push(i.source); });
+    el.feedChips.innerHTML = "";
+    const mk = (value, label, n) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip" + (state.feedSrc === value ? " is-on" : "");
+      b.dataset.value = value;
+      b.innerHTML = esc(label) + ' <span class="chip-num">' + nf.format(n) + "</span>";
+      return b;
+    };
+    el.feedChips.appendChild(mk("all", "Все", items.length));
+    srcs.forEach((s) => {
+      el.feedChips.appendChild(mk(s, s, items.filter((i) => i.source === s).length));
+    });
+    const list = items.filter((i) => {
+      if (state.feedSrc !== "all" && i.source !== state.feedSrc) return false;
+      if (!q) return true;
+      return ((i.title || "") + " " + (i.description || "") + " " + (i.url || "") + " " + (i.source || "")).toLowerCase().includes(q);
+    });
+    const known = {};
+    state.items.forEach((i) => { known[i.url_key] = 1; });
+    el.feedList.innerHTML = list.map((it) => feedCardHtml(it, known)).join("");
+    const cards = el.feedList.querySelectorAll(".feed-card");
+    for (let i = 0; i < cards.length; i++) {
+      ((c, n) => { setTimeout(() => c.classList.add("in"), Math.min(n, 14) * 40); })(cards[i], i);
+    }
+    el.feedEmpty.hidden = list.length > 0;
+    const fresh = items.filter((i) => { const t = new Date(i.found_at).getTime(); return t && (Date.now() - t) < 86400000; }).length;
+    if (el.feedBadge) { el.feedBadge.hidden = fresh === 0; el.feedBadge.textContent = String(fresh); }
+    el.feedMeta.textContent = items.length
+      ? nf.format(items.length) + " " + plural(items.length, "находка", "находки", "находок") + " · обновлено " + (state.feed.updatedAt ? df.format(new Date(state.feed.updatedAt)) : "—")
+      : "";
+  }
+
+  async function addFromFeed(key) {
+    const it = state.feed.items.find((x) => x.url_key === key);
+    if (!it) return;
+    if (state.items.some((x) => x.url_key === key)) { toast("Уже в хранилище"); return; }
+    if (WORKER_URL) {
+      try {
+        const r = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: it.url, title: it.title, description: it.description }),
+        });
+        if (!r.ok) throw new Error(String(r.status));
+        feedAdded.add(key);
+        renderFeed();
+        toast("Отправлено в хранилище — появится на сайте через ~1 минуту");
+      } catch (e) {
+        toast("Воркер не ответил — открыл диалог добавления");
+        el.addText.value = it.url + "\n" + it.title;
+        openDialog(el.dlgAdd);
+      }
+      return;
+    }
+    await addLinks(it.url + "\n" + it.title + (it.description ? " — " + it.description : ""), true);
+    renderFeed();
+  }
+
+  async function copyLink(url, btn) {
+    let ok = false;
+    try { await navigator.clipboard.writeText(url); ok = true; }
+    catch (e) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        ok = document.execCommand("copy");
+        ta.remove();
+      } catch (e2) {}
+    }
+    toast(ok ? "Скопировано: " + (domainOf(url) || url) : "Не удалось скопировать");
+    if (ok && btn) { btn.classList.add("is-copied"); setTimeout(() => btn.classList.remove("is-copied"), 1200); }
+  }
+
   /* ---------- url state ---------- */
   function syncUrl() {
     const f = state.filters;
@@ -453,6 +649,7 @@
     if (f.src !== "all") p.set("src", f.src);
     if (f.sort !== "new") p.set("sort", f.sort);
     if (f.fav) p.set("fav", "1");
+    if (state.tab !== "vault") p.set("tab", state.tab);
     const qs = p.toString();
     history.replaceState(null, "", qs ? "?" + qs : location.pathname);
   }
@@ -464,6 +661,7 @@
     state.filters.src = p.get("src") || "all";
     state.filters.sort = p.get("sort") || "new";
     state.filters.fav = p.get("fav") === "1";
+    state.tab = p.get("tab") === "feed" ? "feed" : "vault";
     el.q.value = state.filters.q;
     el.sort.value = state.filters.sort;
     el.btnFav.setAttribute("aria-pressed", String(state.filters.fav));
@@ -729,10 +927,17 @@
   /* ---------- events ---------- */
   function wireEvents() {
     el.searchForm.addEventListener("submit", (e) => e.preventDefault());
-    let qTimer = 0;
+    let qTimer = 0, scanTimer = 0;
     el.q.addEventListener("input", () => {
       clearTimeout(qTimer);
-      qTimer = setTimeout(() => { state.filters.q = el.q.value; renderCards(); syncUrl(); }, 120);
+      el.grid.classList.add("is-scanning");
+      clearTimeout(scanTimer);
+      scanTimer = setTimeout(() => el.grid.classList.remove("is-scanning"), 620);
+      qTimer = setTimeout(() => {
+        state.filters.q = el.q.value;
+        if (state.tab === "feed") renderFeed(); else renderCards();
+        syncUrl();
+      }, 120);
     });
     el.sort.addEventListener("change", () => { state.filters.sort = el.sort.value; renderCards(); syncUrl(); });
     el.btnFav.addEventListener("click", () => {
@@ -757,9 +962,37 @@
       const btn = e.target.closest("[data-action]"); if (!btn) return;
       const card = btn.closest(".card"); if (!card) return;
       const key = card.dataset.id;
-      if (btn.dataset.action === "edit") { openEdit(key); return; }
+      const act = btn.dataset.action;
+      if (act === "edit") { openEdit(key); return; }
       const it = state.items.find((x) => x.url_key === key);
-      if (it) patchItem(key, { favorite: !it.favorite }, it.favorite ? "Убрано из избранного" : "Добавлено в избранное");
+      if (!it) return;
+      if (act === "copy") { copyLink(it.url, btn); return; }
+      if (act === "flip") { card.classList.toggle("is-flipped"); return; }
+      if (act === "open") { window.open(it.url, "_blank", "noopener"); return; }
+      patchItem(key, { favorite: !it.favorite }, it.favorite ? "Убрано из избранного" : "Добавлено в избранное");
+    });
+
+    if (el.feedList) el.feedList.addEventListener("click", (e) => {
+      const add = e.target.closest("[data-feed-add]");
+      if (add) { addFromFeed(add.dataset.feedAdd); return; }
+      const cp = e.target.closest("[data-feed-copy]");
+      if (cp) {
+        const it = state.feed.items.find((x) => x.url_key === cp.dataset.feedCopy);
+        if (it) copyLink(it.url, cp);
+      }
+    });
+    if (el.feedChips) el.feedChips.addEventListener("click", (e) => {
+      const b = e.target.closest(".chip"); if (!b) return;
+      state.feedSrc = b.dataset.value; renderFeed();
+    });
+    document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+
+    if (el.btnRandom) el.btnRandom.addEventListener("click", () => {
+      if (!state.items.length) { toast("Хранилище пустое"); return; }
+      if (state.tab !== "vault") switchTab("vault");
+      const it = state.items[Math.floor(Math.random() * state.items.length)];
+      flashCard(it.url_key);
+      toast("Случайный выбор: " + prettyTitle(it));
     });
 
     el.btnAdd.addEventListener("click", () => { el.addText.value = ""; openDialog(el.dlgAdd); setTimeout(() => el.addText.focus(), 30); });
@@ -922,7 +1155,8 @@
   }
 
   async function boot() {
-    ["brandMeta","searchForm","q","btnAdd","btnTheme","btnSettings","navCategories","navSources","chips","btnExport","pendingHint","viewTitle","viewCount","sort","btnFav","grid","empty","emptyTitle","emptyText","btnEmptyAdd","dlgAdd","formAdd","addText","addEnrich","addSubmit","dlgEdit","formEdit","editTitle","editDesc","editCat","editTags","editNote","editUrl","btnDelete","dlgSettings","formSettings","setRepo","setBranch","setToken","btnForget","toast"].forEach((id) => { el[id] = $(id); });
+    ["brandMeta","searchForm","q","btnAdd","btnTheme","btnSettings","navCategories","navSources","chips","btnExport","pendingHint","viewTitle","viewCount","sort","btnFav","grid","empty","emptyTitle","emptyText","btnEmptyAdd","dlgAdd","formAdd","addText","addEnrich","addSubmit","dlgEdit","formEdit","editTitle","editDesc","editCat","editTags","editNote","editUrl","btnDelete","dlgSettings","formSettings","setRepo","setBranch","setToken","btnForget","toast","feedWrap","feedList","feedChips","feedBadge","feedMeta","feedEmpty","btnRandom"].forEach((id) => { el[id] = $(id); });
+    el.layout = document.querySelector(".layout");
 
     const saved = localStorage.getItem(LS.theme);
     setTheme(saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
@@ -935,6 +1169,8 @@
     readUrl();
     await loadData();
     renderAll();
+    if (state.tab === "feed") switchTab("feed");
+    loadFeed();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
