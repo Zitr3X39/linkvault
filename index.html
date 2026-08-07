@@ -12,10 +12,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="assets/styles.css?v=16" />
+<link rel="stylesheet" href="assets/styles.css?v=17" />
+<link rel="stylesheet" href="assets/v141.css?v=17" />
 </head>
 <body>
-  <div class="intro" id="intro" aria-hidden="true"><div class="intro-door dl"></div><div class="intro-door dr"></div><div class="intro-inner"><div class="intro-mark"><svg viewBox="0 0 32 32" width="40" height="40" fill="none"><rect x="9.4" y="4" width="13.2" height="24" rx="3.2" stroke="currentColor" stroke-width="2"/><rect x="13.3" y="9.2" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="14.1" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="19" width="3.2" height="2.1" rx="1.05" fill="currentColor"/></svg></div><div class="intro-name" translate="no"><span style="animation-delay:520ms">M</span><span style="animation-delay:640ms">O</span><span style="animation-delay:760ms">N</span><span style="animation-delay:880ms">O</span><span style="animation-delay:1000ms">L</span><span style="animation-delay:1120ms">I</span><span style="animation-delay:1240ms">T</span><span style="animation-delay:1360ms">H</span></div><div class="intro-bar"><i></i></div></div></div>
+  <div class="intro" id="intro" aria-hidden="true"><div class="intro-door dl"></div><div class="intro-door dr"></div><div class="intro-inner"><div class="intro-vault"><svg class="intro-ring" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="50"/><circle class="ring-hi" cx="55" cy="55" r="50"/></svg><div class="intro-mark"><svg viewBox="0 0 32 32" width="40" height="40" fill="none"><rect x="9.4" y="4" width="13.2" height="24" rx="3.2" stroke="currentColor" stroke-width="2"/><rect x="13.3" y="9.2" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="14.1" width="5.4" height="2.1" rx="1.05" fill="currentColor"/><rect x="13.3" y="19" width="3.2" height="2.1" rx="1.05" fill="currentColor"/></svg></div></div><div class="intro-name" translate="no"><span style="animation-delay:520ms">M</span><span style="animation-delay:640ms">O</span><span style="animation-delay:760ms">N</span><span style="animation-delay:880ms">O</span><span style="animation-delay:1000ms">L</span><span style="animation-delay:1120ms">I</span><span style="animation-delay:1240ms">T</span><span style="animation-delay:1360ms">H</span></div><div class="intro-bar"><i></i></div></div></div>
   <script>(function(){var el=document.getElementById("intro");if(!el)return;var seen=false;try{seen=!!sessionStorage.getItem("lv.intro");sessionStorage.setItem("lv.intro","1");}catch(e){}if(seen||matchMedia("(prefers-reduced-motion: reduce)").matches){el.remove();return;}setTimeout(function(){el.classList.add("is-out");setTimeout(function(){el.remove();},1250);},4200);})();</script>
 <a class="skip-link" href="#main">К содержимому</a>
 
@@ -47,7 +48,7 @@
         <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M16 11.5A6.5 6.5 0 0 1 8.5 4a6.5 6.5 0 1 0 7.5 7.5Z" fill="currentColor"/></svg>
       </button>
       <button type="button" class="btn btn-icon" id="btnSettings" aria-label="Настройки синхронизации">
-        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.6.9 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.6 0-1.25.41-1.51 1Z"/></svg>
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.6.9 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.6 0-1.25.41-1.51 1Z"/></svg>
       </button>
     </div>
   </header>
@@ -70,7 +71,7 @@
         <button type="button" class="btn btn-ghost btn-block btn-recat btn-translate" id="btnTranslate">Перевести описания</button>
         <label class="side-check"><input type="checkbox" id="setPreviews" checked> Превью сайтов</label>
         <p class="hint" id="pendingHint" hidden></p>
-        <p class="hint ver-line">MONOLITH v14</p>
+        <p class="hint ver-line">MONOLITH v14.1</p>
       </div>
     </aside>
 
@@ -78,7 +79,7 @@
       <section class="hero">
         <h1 class="hero-title"><span class="w" style="animation-delay:.02s">Всё,</span> <span class="w" style="animation-delay:.08s">что</span> <span class="w" style="animation-delay:.14s">ты</span> <span class="w" style="animation-delay:.20s">сохранил</span> <span class="w grad" style="animation-delay:.26s">в</span> <span class="w grad" style="animation-delay:.32s">одном</span> <span class="w grad" style="animation-delay:.38s">месте</span></h1>
         <p class="hero-sub">Репозитории, каналы, тулзы и видео — разложено по категориям и цветам, без поисков по закладкам.</p>
-        <div class="stats" id="stats"><div class="stat"><span class="stat-num" id="statLinks">0</span><span class="stat-cap">ссылок</span></div><div class="stat"><span class="stat-num" id="statCats">0</span><span class="stat-cap">категорий</span></div><div class="stat"><span class="stat-num" id="statSources">0</span><span class="stat-cap">источников</span></div><div class="stat"><span class="stat-num" id="statFav">0</span><span class="stat-cap">в избранном</span></div><div class="stat"><span class="stat-num" id="statStreak">0</span><span class="stat-cap">дней подряд</span></div><button type="button" class="stat stat-btn" id="btnRandom" aria-label="Открыть случайную ссылку"><span class="stat-num">⚄</span><span class="stat-cap">случайная ссылка</span></button></div>
+        <div class="stats" id="stats"><div class="stat"><span class="stat-num" id="statLinks">0</span><span class="stat-cap">ссылок</span></div><div class="stat"><span class="stat-num" id="statCats">0</span><span class="stat-cap">категорий</span></div><div class="stat"><span class="stat-num" id="statSources">0</span><span class="stat-cap">источников</span></div><div class="stat"><span class="stat-num" id="statFav">0</span><span class="stat-cap">в избранном</span></div><div class="stat"><span class="stat-num" id="statStreak">0</span><span class="stat-cap">дней подряд</span></div></div>
       </section>
 
       <div class="content-head">
@@ -112,12 +113,14 @@
   </div>
 
   <section class="feed-wrap" id="feedWrap" hidden>
-    <div class="feed-head">
-      <h2>Свежие находки</h2>
-      <span class="feed-updated" id="feedMeta"></span>
+    <div class="feed-grid">
+      <aside class="feed-side">
+        <h2>Свежие находки</h2>
+        <span class="feed-updated" id="feedMeta"></span>
+        <nav class="feed-nav" id="feedChips" aria-label="Фильтр по источнику новости"></nav>
+      </aside>
+      <div class="feed-snap" id="feedList"></div>
     </div>
-    <div class="feed-chips" id="feedChips" aria-label="Фильтр по источнику новости"></div>
-    <div class="feed-list" id="feedList"></div>
     <div class="feed-empty" id="feedEmpty" hidden>
       <h3>Лента пока пустая</h3>
       <p>Сбор запускается каждый день в 9:00 автоматически. Для первого запуска: GitHub → Actions → News feed → Run workflow.</p>
@@ -218,7 +221,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="assets/app.js?v=16" defer></script>
-<script src="assets/fx.js?v=16" defer></script>
+<script src="assets/app.js?v=17" defer></script>
+<script src="assets/fx.js?v=17" defer></script>
 </body>
 </html>
