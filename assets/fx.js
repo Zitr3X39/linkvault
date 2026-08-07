@@ -147,19 +147,38 @@
     requestAnimationFrame(step);
   }
 
+  function streakDays(days) {
+    function key(dt) { return dt.toISOString().slice(0, 10); }
+    var now = new Date();
+    var cur = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    if (!days[key(cur)]) {
+      cur = new Date(cur.getTime() - 86400000);
+      if (!days[key(cur)]) return 0;
+    }
+    var streak = 0;
+    while (days[key(cur)]) {
+      streak++;
+      cur = new Date(cur.getTime() - 86400000);
+    }
+    return streak;
+  }
+
   function paintStats() {
     var box = doc.getElementById("stats");
     if (!box) return;
-    var cats = {}, srcs = {}, fav = 0;
+    var cats = {}, srcs = {}, fav = 0, days = {};
     ITEMS.forEach(function (i) {
       cats[i.category || "other"] = 1;
       srcs[i.type || "site"] = 1;
       if (i.favorite) fav++;
+      var d = String(i.added_at || "").slice(0, 10);
+      if (d) days[d] = 1;
     });
     countUp(doc.getElementById("statLinks"), ITEMS.length);
     countUp(doc.getElementById("statCats"), Object.keys(cats).length);
     countUp(doc.getElementById("statSources"), Object.keys(srcs).length);
     countUp(doc.getElementById("statFav"), fav);
+    countUp(doc.getElementById("statStreak"), streakDays(days));
   }
 
   var getJson = function (u, fb) {
@@ -499,7 +518,12 @@
   function textFor(t) {
     if (!t || !t.closest) return "";
     if (t.closest('[data-action="fav"]')) return "В избранное";
+    if (t.closest('[data-action="copy"]')) return "Скопировать ссылку";
+    if (t.closest('[data-action="flip"]')) return "Описание";
     if (t.closest('[data-action="edit"]')) return "Правка";
+    if (t.closest("[data-feed-add]")) return "В хранилище";
+    if (t.closest("[data-feed-copy]")) return "Скопировать ссылку";
+    if (t.closest("#btnRandom")) return "Случайная ссылка";
     if (t.closest(".card-title a")) return "Открыть";
     if (t.closest(".card")) return "Открыть";
     if (t.closest(".accent-dot")) return "Цвет";
@@ -542,7 +566,7 @@
 
 (function () {
   var sheet = null;
-  var rows = [["/", "Поиск"], ["A", "Добавить ссылку"], ["Ctrl K", "Командная палитра"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
+  var rows = [["/", "Поиск"], ["A", "Добавить ссылку"], ["Ctrl K", "Командная палитра"], ["R", "Случайная ссылка"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
   function toggleSheet() {
     if (sheet) { sheet.remove(); sheet = null; return; }
     sheet = document.createElement("div");
@@ -566,6 +590,7 @@
     if (busy()) return;
     var k = e.key.toLowerCase();
     if (k === "n") { e.preventDefault(); hit("btnAdd"); }
+    else if (k === "r") { e.preventDefault(); hit("btnRandom"); }
     else if (k === "f") { e.preventDefault(); hit("btnFav"); }
     else if (k === "t") { e.preventDefault(); hit("btnTheme"); }
     else if (e.key === "Escape") {
