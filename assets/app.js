@@ -348,6 +348,9 @@
     }
   }
 
+  /* Домены, где внешний скриншот всегда мусор (Cloudflare, логин-страницы) — им рисуем свою обложку */
+  var NO_SHOT = ["chromewebstore.google.com", "curseforge.com", "t.me", "tiktok.com", "vm.tiktok.com"];
+
   function mediaSrc(u) {
     try {
       var url = new URL(u);
@@ -360,7 +363,7 @@
         var seg = url.pathname.split("/").filter(Boolean);
         if (seg.length >= 2) return "https://opengraph.githubassets.com/1/" + seg[0] + "/" + seg[1];
       }
-      if (h === "t.me" || h === "tiktok.com" || h === "vm.tiktok.com") return "";
+      for (var i = 0; i < NO_SHOT.length; i++) if (h === NO_SHOT[i] || h.endsWith("." + NO_SHOT[i])) return "";
       return "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(url.origin + url.pathname) + "?w=640&h=360";
     } catch (e) { return ""; }
   }
@@ -740,7 +743,6 @@
     el.navCategories.addEventListener("click", (e) => {
       const b = e.target.closest(".nav-item"); if (!b) return;
       state.filters.cat = b.dataset.value;
-      state.filters.src = "all";
       renderNav(); renderChips(); renderCards(); syncUrl();
     });
     el.navSources.addEventListener("click", (e) => {
