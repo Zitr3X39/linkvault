@@ -6,6 +6,11 @@
 вытаскивает ссылки и дописывает их в data/links.json.
 Смещение (offset) хранится в data/tg_offset.json, чтобы не брать старое.
 
+Категория определяется автоматически: сначала по домену (правила из
+data/categories.json), потом по ключевым словам в ссылке и тексте сообщения.
+Пустые категории на сайте не показываются — они появляются сами,
+как только в них попадает первая ссылка.
+
 Нужен секрет репозитория TELEGRAM_BOT_TOKEN (бот создаётся у @BotFather).
 Если секрета нет — падаем с ошибкой, чтобы это было видно во вкладке Actions.
 """
@@ -27,6 +32,7 @@ if not TOKEN:
 API = "https://api.telegram.org/bot" + TOKEN
 LINKS_PATH = "data/links.json"
 OFFSET_PATH = "data/tg_offset.json"
+CATS_PATH = "data/categories.json"
 URL_RE = re.compile(r"(?:https?://|www\.|t\.me/)[^\s<>\"'«»]+", re.IGNORECASE)
 TRACK = re.compile(r"^(utm_|fbclid|gclid|yclid|igshid|si$|ref$|ref_src)", re.IGNORECASE)
 
@@ -70,7 +76,68 @@ def detect_type(url):
         return "twitter"
     if host.endswith("reddit.com"):
         return "reddit"
+    if host in ("chromewebstore.google.com", "microsoftedge.microsoft.com") or host.endswith("addons.mozilla.org") or host.endswith("addons.opera.com"):
+        return "extension"
     return "site"
+
+
+def load_rules():
+    try:
+        with open(CATS_PATH, encoding="utf-8") as f:
+            cfg = json.load(f)
+        return cfg.get("rules", [])
+    except Exception:
+        return []
+
+
+RULES = load_rules()
+
+STRONG_RULES = [
+    ("automation", ["mcp", "n8n", "zapier", "webhook", "telethon", "telegram bot", "автоматиз"]),
+    ("gamedev", ["godot", "unity", "unreal"]),
+    ("video", ["ffmpeg", "davinci", "capcut", "монтаж", "озвуч"]),
+    ("design", ["figma", "photoshop", "illustrator", "ui/ux"]),
+    ("vibecoding", ["llm", "gpt", "openai", "anthropic", "claude", "langchain", "prompt"]),
+]
+
+EXTRA_RULES = [
+    ("video", ["video", "видео", "shorts", "tts", "voice", "субтитр", "premiere", "youtube", "stream", "ролик"]),
+    ("vibecoding", ["ai ", "ai-", "-ai", "llm", "gpt", "claude", "openai", "anthropic", "agent", "langchain", "copilot", "cursor", "neural", "нейрос", "machine learning", "embedding"]),
+    ("gamedev", ["game", "игр", "godot", "unity", "unreal", "sprite", "pixel art"]),
+    ("design", ["design", "дизайн", "figma", "ui/ux", "icon", "шрифт", "font", "mockup"]),
+    ("automation", ["mcp", "telegram", "n8n", "zapier", "workflow", "automation", "автоматиз", "webhook", "scraper", "парсер", "selenium", "playwright", "bot ", "bots"]),
+    ("learning", ["course", "курс", "tutorial", "learn", "обучен", "guide", "гайд", "docs", "roadmap", "cheatsheet"]),
+    ("tools", ["cli", "downloader", "converter", "конверт", "utility", "утилит", "manager", "backup", "extension", "расширен", "toolkit"]),
+]
+
+
+def host_of(url):
+    try:
+        return (urllib.parse.urlsplit(url).hostname or "").lower()
+    except Exception:
+        return ""
+
+
+def detect_category(url, text):
+    """Категория по домену и ключевым словам в ссылке и тексте сообщения."""
+    hay = ((url or "") + " " + (text or "")).lower()
+    host = host_of(url)
+    for rule in RULES:
+        for d in rule.get("domains", []):
+            d = d.lower()
+            if host == d or host.endswith("." + d):
+                return rule["cat"]
+    for cat, words in STRONG_RULES:
+        if any(w in hay for w in words):
+            return cat
+    for rule in RULES:
+        for w in rule.get("words", []):
+            if w.lower() in hay:
+                return rule["cat"]
+    for cat, words in EXTRA_RULES:
+        if any(w in hay for w in words):
+            return cat
+    return "other"
 
 
 def main():
@@ -113,15 +180,16 @@ def main():
             if key in known:
                 continue
             known.add(key)
-            host = (urllib.parse.urlsplit(url).hostname or "").lower()
+            host = host_of(url)
+            context = text.replace(raw, " ").strip()
             items.append({
                 "url": url,
                 "url_key": key,
                 "title": host,
-                "description": "",
+                "description": context[:220],
                 "note": "",
                 "domain": host,
-                "category": "other",
+                "category": detect_category(url, context),
                 "type": detect_type(url),
                 "source": "Telegram-бот",
                 "tags": [],
