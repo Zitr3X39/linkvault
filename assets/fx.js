@@ -162,17 +162,30 @@
     countUp(doc.getElementById("statFav"), fav);
   }
 
-  fetch("data/links.json?t=" + Date.now())
-    .then(function (r) { return r.ok ? r.json() : { items: [] }; })
-    .catch(function () { return { items: [] }; })
-    .then(function (data) {
+  var getJson = function (u, fb) {
+    return fetch(u).then(function (r) { return r.ok ? r.json() : fb; }).catch(function () { return fb; });
+  };
+  Promise.all([
+    getJson("data/links.json?t=" + Date.now(), { items: [] }),
+    getJson("data/enrich.json?t=" + Date.now(), { items: {} })
+  ]).then(function (both) {
+      var data = both[0], ENRICH = (both[1] && both[1].items) || {};
       var ov = overlayItems();
       var base = (data.items || []).concat(ov.added || []);
       var dead = {};
       (ov.deleted || []).forEach(function (k) { dead[k] = 1; });
       ITEMS = base.filter(function (i) { return !dead[i.url_key]; }).map(function (i) {
         var patch = ov.edits[i.url_key];
-        return patch ? Object.assign({}, i, patch) : i;
+        var it = patch ? Object.assign({}, i, patch) : Object.assign({}, i);
+        var e = ENRICH[it.url_key];
+        if (e) {
+          var t = String(it.title || "").trim();
+          var junk = !t || /^[a-z0-9]{20,}$/i.test(t) || t.replace(/[^a-z\u0400-\u04ff]/gi, "").length < 4;
+          if (e.title && junk && !(patch && patch.title)) it.title = e.title;
+          if (e.description && !String(it.description || "").trim()) it.description = e.description;
+          if (e.category && (it.category || "other") === "other" && !(patch && patch.category)) it.category = e.category;
+        }
+        return it;
       });
       paintStats();
     });
@@ -360,7 +373,7 @@
     swapTimer = setTimeout(function () { grid.classList.remove("is-swapping"); }, 240);
   }
   doc.addEventListener("click", function (e) {
-    if (e.target.closest && e.target.closest(".nav-item,.chip-toggle")) swap();
+    if (e.target.closest && e.target.closest(".nav-item,.chip-toggle,.chip")) swap();
   });
   var sortSel = doc.getElementById("sort");
   if (sortSel) sortSel.addEventListener("change", swap);
@@ -529,7 +542,7 @@
 
 (function () {
   var sheet = null;
-  var rows = [["/", "Поиск"], ["Ctrl K", "Командная палитра"], ["N", "Добавить ссылку"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
+  var rows = [["/", "Поиск"], ["A", "Добавить ссылку"], ["Ctrl K", "Командная палитра"], ["F", "Только избранное"], ["T", "Светлая / тёмная"], ["Esc", "Сбросить фильтры"], ["Ctrl V", "Вставить ссылку сразу"], ["?", "Эта подсказка"]];
   function toggleSheet() {
     if (sheet) { sheet.remove(); sheet = null; return; }
     sheet = document.createElement("div");
