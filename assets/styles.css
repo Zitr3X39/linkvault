@@ -604,3 +604,9 @@ html::-webkit-scrollbar{width:0;height:0}
 @keyframes flashRing{0%,60%{box-shadow:0 0 0 2px var(--cat),0 0 32px color-mix(in srgb,var(--cat) 45%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
 .nav-item.is-zero{opacity:.38}
 .ver-line{margin-top:9px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);opacity:.55}
+
+/* ===== v13.1: real screenshots layered over own covers ===== */
+.card-media.is-cover.has-img{padding:0}
+.card-media.is-cover.has-img::after{right:10px;opacity:.1}
+.card-media .cover-shot{position:absolute;inset:0;z-index:2;width:100%;height:100%;object-fit:cover;opacity:1;transform:none;padding:0;border:0;border-radius:inherit;background:var(--ink-3)}
+.card-media.is-cover.has-img .cover-fav,.card-media.is-cover.has-img .cover-title,.card-media.is-cover.has-img .cover-stars{display:none}
