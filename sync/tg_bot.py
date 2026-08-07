@@ -7,6 +7,7 @@
 Смещение (offset) хранится в data/tg_offset.json, чтобы не брать старое.
 
 Нужен секрет репозитория TELEGRAM_BOT_TOKEN (бот создаётся у @BotFather).
+Если секрета нет — падаем с ошибкой, чтобы это было видно во вкладке Actions.
 """
 import json
 import os
@@ -18,8 +19,10 @@ from datetime import datetime, timezone
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
 if not TOKEN:
-    print("BOT_TOKEN не задан — выхожу без ошибки")
-    sys.exit(0)
+    print("ОШИБКА: секрет TELEGRAM_BOT_TOKEN не задан.")
+    print("Репозиторий → Settings → Secrets and variables → Actions → New repository secret")
+    print("Name: TELEGRAM_BOT_TOKEN, Secret: токен от @BotFather")
+    sys.exit(1)
 
 API = "https://api.telegram.org/bot" + TOKEN
 LINKS_PATH = "data/links.json"
