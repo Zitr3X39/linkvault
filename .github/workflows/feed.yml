@@ -1,0 +1,16 @@
+name: News feed
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 sync/feed.py
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "LinkVault: свежая лента новостей"
