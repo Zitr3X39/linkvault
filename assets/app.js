@@ -356,7 +356,12 @@
       if (h === "youtu.be") yt = url.pathname.slice(1);
       else if (/(^|\.)youtube\.com$/.test(h)) yt = url.searchParams.get("v") || (url.pathname.match(/\/(shorts|embed|live)\/([\w-]+)/) || [])[2] || null;
       if (yt) return "https://i.ytimg.com/vi/" + yt + "/hqdefault.jpg";
-      return "";
+      if (h === "github.com") {
+        var seg = url.pathname.split("/").filter(Boolean);
+        if (seg.length >= 2) return "https://opengraph.githubassets.com/1/" + seg[0] + "/" + seg[1];
+      }
+      if (h === "t.me" || h === "tiktok.com" || h === "vm.tiktok.com") return "";
+      return "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(url.origin + url.pathname) + "?w=640&h=360";
     } catch (e) { return ""; }
   }
 
@@ -384,13 +389,13 @@
     const dom = it.domain || domainOf(it.url);
     const favSrc = dom ? "https://icons.duckduckgo.com/ip3/" + dom + ".ico" : "";
     const starsCov = it.stars ? '<span class="cover-stars">\u2605 ' + (it.stars >= 1000 ? (it.stars / 1000).toFixed(1).replace(".", ",") + "k" : nf.format(it.stars)) + "</span>" : "";
-    const media = psrc
-      ? '<div class="card-media" data-letter="' + letter + '"><img src="' + esc(psrc) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add(&quot;is-on&quot;);this.parentNode.classList.add(&quot;is-ready&quot;)" onerror="var m=this.parentNode;m.classList.add(&quot;is-ready&quot;,&quot;is-fallback&quot;);this.remove()"></div>'
-      : '<div class="card-media is-ready is-cover" data-letter="' + letter + '">' +
-        (favSrc ? '<img class="cover-fav" src="' + esc(favSrc) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
-        '<span class="cover-title">' + esc(prettyTitle(it)) + "</span>" +
-        starsCov +
-        "</div>";
+    const media =
+      '<div class="card-media is-ready is-cover' + (psrc ? " has-img" : "") + '" data-letter="' + letter + '">' +
+      (favSrc ? '<img class="cover-fav" src="' + esc(favSrc) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
+      '<span class="cover-title">' + esc(prettyTitle(it)) + "</span>" +
+      starsCov +
+      (psrc ? '<img class="cover-shot" src="' + esc(psrc) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : "") +
+      "</div>";
     return (
       '<article class="card" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
         media +
