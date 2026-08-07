@@ -1,0 +1,68 @@
+/* ===== v14.1: snap-лента новостей, видео-слайды, кольцо-сейф в интро, чистый поиск ===== */
+.grid.is-scanning::before{display:none !important}
+
+/* --- интро: вращающееся кольцо сейфа вокруг знака --- */
+.intro-vault{position:relative;width:110px;height:110px;display:grid;place-items:center}
+.intro-ring{position:absolute;inset:0;animation:vaultSpin 7s linear infinite;transform-origin:50% 50%}
+.intro-ring circle{fill:none;stroke:var(--text-3);stroke-width:2;stroke-dasharray:6 10;opacity:.8}
+.intro-ring .ring-hi{stroke:var(--accent);stroke-dasharray:40 305;stroke-linecap:round;opacity:.9}
+.intro-vault .intro-mark{position:relative;width:64px;height:64px}
+.intro.is-out .intro-ring{animation:vaultSpinFast .5s ease-in forwards,introOut .45s var(--ease) forwards}
+@keyframes vaultSpin{to{transform:rotate(360deg)}}
+@keyframes vaultSpinFast{to{transform:rotate(200deg) scale(1.08)}}
+.intro-door.dl::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s .1s;box-shadow:0 0 32px var(--accent)}
+.intro-door.dr::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,transparent,var(--accent-2),transparent);opacity:0;transition:opacity .3s .1s;box-shadow:0 0 32px var(--accent-2)}
+.intro.is-out .dl::after,.intro.is-out .dr::before{opacity:1}
+
+/* --- лента: полноэкранные snap-карточки + липкая левая колонка --- */
+.feed-wrap{max-width:1240px;margin:0 auto;padding:10px 24px 40px;height:calc(100dvh - 132px);display:flex;flex-direction:column;min-height:480px}
+.feed-grid{flex:1;min-height:0;display:grid;grid-template-columns:280px minmax(0,1fr);gap:26px}
+.feed-side{display:flex;flex-direction:column;gap:14px;min-height:0;overflow-y:auto;scrollbar-width:none;padding:6px 2px}
+.feed-side::-webkit-scrollbar{display:none}
+.feed-side h2{font-family:var(--font-display);font-size:clamp(20px,2vw,26px);font-weight:700;letter-spacing:-.01em}
+.feed-nav{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.feed-nav .chip{justify-content:flex-start;width:100%;padding:10px 14px;border-radius:12px}
+.feed-snap{min-height:0;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:smooth;scrollbar-width:none;border-radius:var(--radius-lg);overscroll-behavior:contain}
+.feed-snap::-webkit-scrollbar{display:none}
+.feed-card{scroll-snap-align:start;scroll-snap-stop:always;min-height:calc(100% - 14px);display:flex;flex-direction:column;gap:0;align-items:stretch;padding:0;border-radius:var(--radius-lg);border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);overflow:hidden;margin-bottom:14px}
+.feed-card:hover{transform:none}
+.feed-card.reveal{opacity:0;transform:translateX(56px)}
+.feed-card.reveal.in{opacity:1;transform:none;transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.feed-media{position:relative;flex:1 1 auto;min-height:44%;background:linear-gradient(135deg,color-mix(in srgb,var(--cat,var(--accent)) 18%,var(--ink-2)),var(--ink-2));overflow:hidden}
+.feed-letter{position:absolute;inset:0;display:grid;place-items:center;font:700 84px/1 "Unbounded",sans-serif;color:color-mix(in srgb,var(--cat,var(--accent)) 40%,var(--text-3));opacity:.4}
+.feed-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kenburns 18s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.07)}}
+.feed-media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,color-mix(in srgb,var(--ink) 72%,transparent));pointer-events:none}
+.feed-video{position:absolute;inset:0;z-index:2;width:100%;height:100%;border:0}
+.feed-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;color:var(--accent-ink);background:linear-gradient(135deg,var(--accent),var(--accent-2));border:0;cursor:pointer;box-shadow:0 12px 44px -10px color-mix(in srgb,var(--accent) 70%,transparent);transition:transform .3s var(--spring)}
+.feed-play:hover{transform:translate(-50%,-50%) scale(1.08)}
+.feed-play svg{margin-left:4px}
+.feed-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--text);border:1px solid var(--line-2);background:color-mix(in srgb,var(--ink-2) 72%,transparent);backdrop-filter:blur(8px);cursor:pointer;opacity:0;transition:opacity .25s;font-size:20px;line-height:1;padding:0}
+.feed-card:hover .feed-arrow,.feed-card:focus-within .feed-arrow{opacity:1}
+.feed-arrow.prev{left:14px}
+.feed-arrow.next{right:14px}
+.feed-dots{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:3;display:flex;gap:6px}
+.feed-dots i{width:6px;height:6px;border-radius:50%;background:var(--text-3);opacity:.5;transition:all .25s}
+.feed-dots i.on{background:var(--text);opacity:1;width:16px;border-radius:4px}
+.feed-src-badge{position:absolute;left:14px;top:14px;z-index:3;font:600 10.5px/1 "JetBrains Mono",monospace;padding:5px 9px;border-radius:8px;border:1px solid var(--line-2);color:var(--text);background:color-mix(in srgb,var(--ink-2) 70%,transparent);backdrop-filter:blur(8px)}
+.feed-body{flex:0 0 auto;display:flex;flex-direction:column;gap:10px;padding:18px 22px 20px}
+.feed-title{font-size:clamp(17px,1.9vw,24px);font-weight:600;line-height:1.25;letter-spacing:-.01em}
+.feed-desc{font-size:14px;line-height:1.65;color:var(--text-2);max-width:70ch;-webkit-line-clamp:unset;display:block;overflow:visible}
+.feed-desc-dim{color:var(--text-3);font-style:italic}
+.feed-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.feed-actions .btn-sm{height:38px;padding:0 16px;font-size:13px}
+.feed-open{display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+@media (max-width:920px){
+  .feed-wrap{height:auto;padding:12px 16px 60px}
+  .feed-grid{grid-template-columns:1fr}
+  .feed-side{flex-direction:row;align-items:center;flex-wrap:wrap;gap:8px;overflow:visible}
+  .feed-side h2{flex:1 1 100%}
+  .feed-nav{flex-direction:row;overflow-x:auto;scrollbar-width:none;margin-top:0}
+  .feed-nav .chip{width:auto;flex:0 0 auto}
+  .feed-snap{height:calc(100dvh - 240px);min-height:420px}
+}
+@media (prefers-reduced-motion:reduce){
+  .feed-shot{animation:none}
+  .feed-card.reveal{opacity:1;transform:none}
+  .intro-ring{animation:none}
+}
