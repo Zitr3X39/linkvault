@@ -66,3 +66,13 @@
   .feed-card.reveal{opacity:1;transform:none}
   .intro-ring{animation:none}
 }
+
+/* ===== v14.2: интро без постоянного шва + рабочий оборот карточки ===== */
+/* створки в покое сливаются в один фон: никаких постоянных границ */
+.intro-door.dl{border-right:0}
+.intro-door.dr{border-left:0}
+/* кликабельна только видимая сторона карточки */
+.flip-front{pointer-events:auto}
+.flip-back{pointer-events:none}
+.card.is-flipped .flip-front{pointer-events:none}
+.card.is-flipped .flip-back{pointer-events:auto}
