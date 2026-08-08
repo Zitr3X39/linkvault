@@ -1,7 +1,23 @@
 {
  "version": 1,
- "updated_at": "2026-08-08T07:54:21.715Z",
+ "updated_at": "2026-08-08T07:55:46.218Z",
  "items": [
+  {
+   "url": "https://github.com/unclebob/swarm-forge",
+   "url_key": "github.com/unclebob/swarm-forge",
+   "title": "unclebob/swarm-forge",
+   "description": "Простой инструмент для координации нескольких агентов ИИ. · Клоджур",
+   "note": "",
+   "domain": "github.com",
+   "category": "other",
+   "type": "github",
+   "source": "Вручную",
+   "tags": [],
+   "favorite": false,
+   "stars": 1901,
+   "enriched": true,
+   "added_at": "2026-08-08T07:55:44.638Z"
+  },
   {
    "url": "https://github.com/simple-icons/simple-icons",
    "url_key": "github.com/simple-icons/simple-icons",
