@@ -1,37 +1,100 @@
 #!/usr/bin/env python3
-"""LinkVault news feed collector.
+"""MONOLITH news feed collector v2.
 
 Запускается из GitHub Actions раз в день (09:00 по Калининграду).
-Собирает свежие находки про веб-разработку, нейросети и полезные тулзы:
-  - Hacker News (топ за сутки, score >= 40)
-  - dev.to (топ дня, с обложками)
-  - Reddit r/programming + r/MachineLearning (топ дня, с превью)
-  - GitHub Trending (daily, с og-картинками)
-  - Product Hunt (RSS)
+Собирает свежие находки СТРОГО по темам владельца:
+  - AI-инструменты и AI-агенты
+  - AI-скиллы
+  - полезные GitHub-репозитории и инструменты разработки
+  - UX и веб-дизайн
+  - автоматизация
+  - продуктивность
 
-Для карточек без описания/картинки дотягивает og-данные с самого сайта.
-Описания на английском переводит на русский (бесплатный endpoint переводчика).
+Источники: GitHub Trending, Hacker News, dev.to, Reddit, Product Hunt.
 
-Результат складывает в data/feed.json. Ссылки, которые уже есть
-в хранилище (data/links.json), пропускаются. Записи старше 7 дней
-вычищаются, лента ограничена 90 карточками.
+Отличия v2:
+  - тема обязательна: новость вне тем владельца не публикуется вообще;
+  - quality gate: без пригодного русского текста карточка не попадает в items;
+  - разделены title_ru / summary_ru / why_it_matters_ru / use_cases_ru / caveats_ru;
+  - опциональная AI-обработка через NEWS_AI_API_URL / NEWS_AI_API_KEY / NEWS_AI_MODEL
+    (OpenAI-совместимый chat endpoint). Без секретов работает правилами;
+  - mshots не используется нигде;
+  - лента ограничена 35 карточками, записи старше 7 дней вычищаются;
+  - если собрать не удалось ничего — файл ленты не перезаписывается.
+
+Ссылки, которые уже есть в хранилище (data/links.json), пропускаются.
 """
 import json
+import os
 import re
+import sys
 import html
 import urllib.request
 import urllib.parse
 from datetime import datetime, timezone, timedelta
 
-UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) linkvault-feed/1.1"}
+UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) monolith-feed/2.0"}
 FEED_PATH = "data/feed.json"
 LINKS_PATH = "data/links.json"
 CATS_PATH = "data/categories.json"
 MAX_AGE_DAYS = 7
-MAX_ITEMS = 90
+MAX_ITEMS = 35
 MAX_OG_FETCH = 22  # сколько страниц максимум обходим за запуск за og-данными
+MIN_QUALITY = 45   # порог публикации
 TRACK = re.compile(r"^(utm_|fbclid|gclid|yclid|igshid|si$|ref$|ref_src)", re.IGNORECASE)
 
+# ---------- темы владельца (главный фильтр «о чём») ----------
+# Новость без совпадения хотя бы с одной темой не публикуется.
+TOPICS = [
+    ("ai-skills", "AI-скиллы", [
+        "skill.md", "agent skill", "claude skill", "skills.sh", "agents.md",
+        "skills for", "ai skill", "системный промпт", "system prompt",
+    ]),
+    ("ai-agents", "AI / агенты", [
+        "llm", "gpt", "claude", "openai", "anthropic", "gemini", "deepseek",
+        "mistral", "qwen", "agent", "agentic", "copilot", "neural", "нейрос",
+        "machine learning", " ai ", " ai-", "ai-powered", "artificial intelligence",
+        "text-to-", "text to video", "diffusion", "transformer", "inference",
+        "fine-tun", "embedding", "rag", "mcp", "context window", "vibe cod",
+        "вайбкод", "вайб-код",
+    ]),
+    ("ux-design", "UX / веб-дизайн", [
+        "design", "дизайн", "ui ", " ux", "ui/", "figma", "typograph", "шрифт",
+        "css", "tailwind", "landing", "анимаци", "animation", "frontend",
+        "front-end", "веб-дизайн", "interface", "redesign", "logo", "логотип",
+    ]),
+    ("automation", "Автоматизация", [
+        "automation", "автоматиз", "workflow", "scraper", "scraping", "парсер",
+        "parser", "webhook", "cron", "n8n", "zapier", "bot ", "telegram bot",
+        "playwright", "selenium", "puppeteer", "headless", "pipeline",
+    ]),
+    ("dev-tools", "Инструменты разработки", [
+        "cli", "tool", "utility", "framework", "library", "sdk", " api",
+        "database", "postgres", "sqlite", "git ", "github", "editor", "terminal",
+        "docker", "kubernetes", "self-hosted", "selfhosted", "auth", "testing",
+        "benchmark", "compiler", "debugging", "observability", "monitoring",
+        "open source", "open-source", "devtools", "dev tools", "code review",
+        "ide ", "plugin", "extension", "расширен",
+    ]),
+    ("productivity", "Продуктивность", [
+        "productivity", "продуктивн", "notes", "заметк", "todo", "planner",
+        "knowledge", "bookmark", "закладк", "obsidian", "notion", "pkm",
+        "second brain", "habit", "привычк", "организац",
+    ]),
+]
+
+
+def match_topic(url, text):
+    """Возвращает (topic_id, topic_name) или None — тема обязательна."""
+    hay = " " + ((url or "") + " " + (text or "")).lower() + " "
+    for tid, name, words in TOPICS:
+        for w in words:
+            if w in hay:
+                return tid, name
+    return None
+
+
+# ---------- базовые помощники ----------
 
 def http_text(url, timeout=25, limit=None):
     req = urllib.request.Request(url, headers=UA)
@@ -154,10 +217,20 @@ def og_fetch(url):
     d = pick("og:description") or pick("description")
     i = pick("og:image")
     if d:
-        out["description"] = clean_text(d)[:220]
+        out["description"] = clean_text(d)[:400]
     if i and i.startswith(("http://", "https://")):
         out["image"] = i
     return out
+
+
+# ---------- русский текст и качество ----------
+
+def cyr_ratio(t):
+    letters = re.findall(r"[A-Za-z\u0400-\u04FF]", t or "")
+    if not letters:
+        return 0.0
+    cyr = [c for c in letters if "\u0400" <= c <= "\u04FF"]
+    return len(cyr) / len(letters)
 
 
 def needs_ru(t):
@@ -179,9 +252,89 @@ def translate_ru(text):
         return ""
 
 
+def has_html_junk(t):
+    return bool(re.search(r"&[a-z]+;|&#\d+;|<[a-z/][^>]*>", t or "", re.I))
+
+
+def ru_text_ok(t, min_len=30):
+    """Грубая проверка, что русский текст пригоден для показа."""
+    t = (t or "").strip()
+    if len(t) < min_len:
+        return False
+    if has_html_junk(t):
+        return False
+    if cyr_ratio(t) < 0.5:
+        return False
+    return True
+
+
+AI_SYS_PROMPT = (
+    "Ты редактор личной ленты полезных инструментов MONOLITH. "
+    "На входе: оригинальный заголовок, описание, домен, категория и извлечённый текст. "
+    "Верни только JSON. Пиши естественно по-русски, без дословной кальки. "
+    "Не переводь имена продуктов, репозиториев и технологий. "
+    "title_ru: понятный русский заголовок (имя продукта сохраняется). "
+    "summary_ru: 1-2 предложения, что это такое. "
+    "why_it_matters_ru: 2-4 предложения, чем это полезно человеку, который сохраняет "
+    "AI-инструменты, репозитории, материалы по автоматизации, дизайну и видео. "
+    "use_cases_ru: 2-4 конкретных сценария, не общие слова. "
+    "caveats_ru: реальные ограничения, только если видны из исходных данных. "
+    "Не придумывай функции и цены. Если исходных данных недостаточно, верни {\"rejected\": true}."
+)
+
+
+def ai_enrich(it):
+    """Провайдер-независимое обогащение через OpenAI-совместимый endpoint.
+
+    Без NEWS_AI_API_URL / NEWS_AI_API_KEY возвращает None — это нормальный
+    режим работы: лента собирается правилами без AI.
+    """
+    api_url = (os.environ.get("NEWS_AI_API_URL") or "").strip()
+    api_key = (os.environ.get("NEWS_AI_API_KEY") or "").strip()
+    if not api_url or not api_key:
+        return None
+    model = (os.environ.get("NEWS_AI_MODEL") or "").strip() or "gpt-4o-mini"
+    payload = {
+        "model": model,
+        "temperature": 0.3,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": AI_SYS_PROMPT},
+            {"role": "user", "content": json.dumps({
+                "title": it.get("title") or "",
+                "description": it.get("description") or "",
+                "domain": it.get("domain") or "",
+                "category": it.get("category") or "",
+                "topic": it.get("topic_name") or "",
+            }, ensure_ascii=False)},
+        ],
+    }
+    try:
+        req = urllib.request.Request(
+            api_url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
+        )
+        raw = http_text_req(req)
+        data = json.loads(raw)
+        content = (((data.get("choices") or [{}])[0]).get("message") or {}).get("content") or ""
+        out = json.loads(content)
+        if not isinstance(out, dict) or out.get("rejected"):
+            return None
+        return out
+    except Exception as e:
+        print("AI-обогащение не удалось (%s): %s" % (it.get("url_key") or "?", e))
+        return None
+
+
+def http_text_req(req, timeout=40):
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8", "replace")
+
+
 # ---------- collectors ----------
 
-def from_hackernews(limit=14):
+def from_hackernews(limit=10):
     out = []
     try:
         ids = http_json("https://hacker-news.firebaseio.com/v0/topstories.json")[:60]
@@ -209,7 +362,7 @@ def from_hackernews(limit=14):
     return out
 
 
-def from_devto(limit=14):
+def from_devto(limit=10):
     out = []
     try:
         arts = http_json("https://dev.to/api/articles?top=1&per_page=30")
@@ -223,7 +376,7 @@ def from_devto(limit=14):
         title = clean_text(a.get("title") or "")
         if not url or not title:
             continue
-        desc = clean_text(a.get("description") or "")[:220]
+        desc = clean_text(a.get("description") or "")[:400]
         img = a.get("cover_image") or ""
         out.append({"url": url, "title": title, "description": desc, "image": img,
                     "source": "dev.to", "score": a.get("positive_reactions_count") or 0})
@@ -231,7 +384,7 @@ def from_devto(limit=14):
     return out
 
 
-def from_reddit(subs=("programming", "MachineLearning"), limit=8):
+def from_reddit(subs=("artificial", "webdev", "SideProject"), limit=6):
     out = []
     for sub in subs:
         got = 0
@@ -250,7 +403,7 @@ def from_reddit(subs=("programming", "MachineLearning"), limit=8):
             url = clean_url(d.get("url") or "")
             if not title or not url:
                 continue
-            desc = clean_text(d.get("selftext") or "")[:220]
+            desc = clean_text(d.get("selftext") or "")[:400]
             img = ""
             try:
                 img = html.unescape(d["preview"]["images"][0]["source"]["url"])
@@ -285,7 +438,7 @@ def from_github_trending(limit=14):
             continue
         name = "/".join([p for p in path.split("/") if p])
         dm = re.search(r'<p[^>]*class="[^"]*col-9[^"]*"[^>]*>(.*?)</p>', b, re.S)
-        desc = clean_text(dm.group(1))[:220] if dm else ""
+        desc = clean_text(dm.group(1))[:400] if dm else ""
         sm = re.search(r"([\d,]+)\s*stars\s*today", b)
         stars = int(sm.group(1).replace(",", "")) if sm else 0
         seg = [p for p in path.split("/") if p]
@@ -296,7 +449,7 @@ def from_github_trending(limit=14):
     return out
 
 
-def from_producthunt(limit=10):
+def from_producthunt(limit=8):
     out = []
     try:
         xml = http_text("https://www.producthunt.com/feed")
@@ -313,13 +466,60 @@ def from_producthunt(limit=10):
 
         title = clean_text(pick("title"))
         url = clean_url(pick("link"))
-        desc = clean_text(pick("description"))[:220]
+        desc = clean_text(pick("description"))[:400]
         if not title or not url:
             continue
         out.append({"url": url, "title": title, "description": desc, "image": "",
                     "source": "Product Hunt", "score": 0})
     print("Product Hunt:", len(out))
     return out
+
+
+# ---------- качество ----------
+
+def norm_title(t):
+    return re.sub(r"[^a-z0-9\u0400-\u04ff]+", "", (t or "").lower())
+
+
+def quality_score(it, now):
+    """Формула из ТЗ: свежесть + сигнал источника + полнота + медиа."""
+    score = 0.0
+    try:
+        age_h = (now - datetime.fromisoformat(str(it.get("found_at")).replace("Z", "+00:00"))).total_seconds() / 3600
+    except Exception:
+        age_h = 72
+    freshness = max(0.0, 1.0 - age_h / (24 * MAX_AGE_DAYS))
+    score += freshness * 25
+    src = it.get("source_score") or 0
+    score += min(src, 800) / 800 * 20
+    score += 25  # тема уже гарантирована фильтром
+    completeness = 0
+    if it.get("summary_ru"):
+        completeness += 0.6
+    if it.get("description"):
+        completeness += 0.2
+    if it.get("title_ru"):
+        completeness += 0.2
+    score += completeness * 20
+    if it.get("image"):
+        score += 10
+    return round(score)
+
+
+def publishable(it):
+    """Жёсткий quality gate: плохое не публикуем вообще."""
+    if not it.get("topic"):
+        return False
+    if not (it.get("title_ru") or "").strip():
+        return False
+    if has_html_junk(it.get("title_ru")):
+        return False
+    # имена репозиториев/продуктов латиницей — ок; статьи должны быть по-русски
+    if it.get("type") != "github" and cyr_ratio(it.get("title_ru")) < 0.4:
+        return False
+    if not ru_text_ok(it.get("summary_ru")):
+        return False
+    return True
 
 
 # ---------- main ----------
@@ -341,24 +541,43 @@ def main():
 
     fresh = []
     seen = set()
+    seen_titles = set()
+    rejected = 0
     for batch in (from_github_trending(), from_hackernews(), from_devto(), from_reddit(), from_producthunt()):
         for it in batch:
             key = url_key(it["url"])
             if not key or key in seen or key in vault_keys:
                 continue
-            seen.add(key)
             text = it.get("title", "") + " " + it.get("description", "")
+            topic = match_topic(it["url"], text)
+            if not topic:
+                rejected += 1
+                continue
+            nt = norm_title(it["title"])
+            if nt and nt in seen_titles:
+                continue
+            seen.add(key)
+            if nt:
+                seen_titles.add(nt)
             fresh.append({
                 "url": it["url"],
                 "url_key": key,
+                "canonical_url": it["url"],
                 "title": it["title"][:160],
-                "description": (it.get("description") or "")[:220],
+                "title_original": it["title"][:160],
+                "description": (it.get("description") or "")[:400],
                 "image": it.get("image") or "",
+                "media_kind": "image" if it.get("image") else "fallback",
                 "source": it["source"],
+                "sources": [{"name": it["source"], "url": it["url"]}],
+                "source_count": 1,
                 "type": detect_type(it["url"]),
                 "category": detect_category(it["url"], text),
+                "topic": topic[0],
+                "topic_name": topic[1],
                 "domain": host_of(it["url"]),
                 "score": it.get("score") or 0,
+                "source_score": it.get("score") or 0,
                 "found_at": now_iso,
             })
 
@@ -375,20 +594,68 @@ def main():
             it["description"] = og["description"]
         if og.get("image") and not it["image"]:
             it["image"] = og["image"]
+            it["media_kind"] = "image"
     print("og-обход:", og_done)
 
-    # перевод описаний на русский
-    tr_done = 0
+    # русский контент: AI-обогащение при наличии секретов, иначе правильный перевод
+    ai_used = 0
     for it in fresh:
-        d = it.get("description") or ""
-        if d and needs_ru(d):
-            ru = translate_ru(d)
-            if ru:
-                it["description_ru"] = ru[:240]
-                tr_done += 1
-    print("переведено описаний:", tr_done)
+        out = ai_enrich(it)
+        if out and ru_text_ok(out.get("summary_ru")) and (out.get("title_ru") or "").strip():
+            it["title_ru"] = clean_text(out["title_ru"])[:160]
+            it["summary_ru"] = clean_text(out["summary_ru"])[:600]
+            it["why_it_matters_ru"] = clean_text(out.get("why_it_matters_ru") or "")[:900]
+            uc = out.get("use_cases_ru") or []
+            it["use_cases_ru"] = [clean_text(x)[:60] for x in uc if x][:4] if isinstance(uc, list) else []
+            cv = out.get("caveats_ru") or []
+            if isinstance(cv, str):
+                cv = [cv] if cv.strip() else []
+            it["caveats_ru"] = [clean_text(x)[:200] for x in cv if x][:3]
+            it["translation_status"] = "reviewed"
+            it["description_ru"] = it["summary_ru"][:240]
+            ai_used += 1
+            continue
+        # fallback без AI: перевод + жёсткая проверка результата
+        title_src = it.get("title") or ""
+        desc_src = it.get("description") or ""
+        if it.get("type") == "github":
+            # имя репозитория не переводим
+            it["title_ru"] = title_src
+        else:
+            tr_t = translate_ru(title_src) if needs_ru(title_src) else title_src
+            it["title_ru"] = clean_text(tr_t)[:160] if tr_t else title_src
+        summary = ""
+        if desc_src:
+            summary = translate_ru(desc_src) if needs_ru(desc_src) else desc_src
+        summary = clean_text(summary)
+        if ru_text_ok(summary):
+            it["summary_ru"] = summary[:600]
+            it["description_ru"] = summary[:240]
+            it["translation_status"] = "reviewed" if not needs_ru(desc_src) else "generated"
+        else:
+            it["summary_ru"] = ""
+            it["description_ru"] = ""
+            it["translation_status"] = "failed"
+        it.setdefault("why_it_matters_ru", "")
+        it.setdefault("use_cases_ru", [])
+        it.setdefault("caveats_ru", [])
+    print("AI-обогащено:", ai_used)
 
-    # старые записи ленты: держим неделю, не дублируя свежие
+    # quality gate + оценка
+    ready = []
+    for it in fresh:
+        if not publishable(it):
+            rejected += 1
+            continue
+        it["content_status"] = "ready"
+        it["quality_score"] = quality_score(it, now)
+        if it["quality_score"] < MIN_QUALITY:
+            rejected += 1
+            continue
+        it["published_at"] = now_iso
+        ready.append(it)
+
+    # старые записи ленты: держим неделю, не дублируя свежие; только прошедшие gate
     old = []
     try:
         with open(FEED_PATH, encoding="utf-8") as f:
@@ -403,17 +670,36 @@ def main():
             continue
         if str(it.get("found_at") or "") < cutoff:
             continue
+        if it.get("version2") is not True and not it.get("summary_ru"):
+            # старые v1-записи без summary_ru доживают максимум до конца окна,
+            # но в новую ленту попадают только если проходят gate по теме
+            if not it.get("topic"):
+                topic = match_topic(it.get("url", ""), (it.get("title", "") + " " + it.get("description", "")))
+                if not topic:
+                    continue
+                it["topic"] = topic[0]
+                it["topic_name"] = topic[1]
         seen.add(k)
         kept.append(it)
 
-    items = fresh + kept
-    items.sort(key=lambda x: str(x.get("found_at") or ""), reverse=True)
+    items = ready + kept
+    items.sort(key=lambda x: (x.get("quality_score") or 0, str(x.get("found_at") or "")), reverse=True)
     items = items[:MAX_ITEMS]
 
+    if not items:
+        print("ВНИМАНИЕ: собралось 0 карточек — ленту НЕ перезаписываю, оставляю прошлую.")
+        sys.exit(1)
+
+    payload = {
+        "version": 2,
+        "updated_at": now_iso,
+        "meta": {"fresh": len(ready), "rejected": rejected, "ai": ai_used},
+        "items": items,
+    }
     with open(FEED_PATH, "w", encoding="utf-8") as f:
-        json.dump({"version": 1, "updated_at": now_iso, "items": items}, f, ensure_ascii=False, indent=1)
+        json.dump(payload, f, ensure_ascii=False, indent=1)
         f.write("\n")
-    print("Лента: всего", len(items), "| новых за сегодня:", len(fresh))
+    print("Лента v2: всего", len(items), "| новых:", len(ready), "| отсеяно:", rejected, "| AI:", ai_used)
 
 
 if __name__ == "__main__":
