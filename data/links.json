@@ -1,7 +1,23 @@
 {
  "version": 1,
- "updated_at": "2026-08-08T08:02:26.903Z",
+ "updated_at": "2026-08-08T08:27:00.518Z",
  "items": [
+  {
+   "url": "https://github.com/cloudflare/computer",
+   "url_key": "github.com/cloudflare/computer",
+   "title": "cloudflare/computer",
+   "description": "Дайте вашему агенту компьютер 👾 · TypeScript",
+   "note": "",
+   "domain": "github.com",
+   "category": "devops",
+   "type": "github",
+   "source": "Вручную",
+   "tags": [],
+   "favorite": false,
+   "stars": 6061,
+   "enriched": true,
+   "added_at": "2026-08-08T08:26:58.965Z"
+  },
   {
    "url": "https://github.com/Significant-Gravitas/AutoGPT",
    "url_key": "github.com/significant-gravitas/autogpt",
