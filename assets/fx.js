@@ -444,11 +444,12 @@
   function apply() {
     raf = 0;
     if (!cur) return;
+    if (cur.classList.contains("is-flipped")) { drop(); return; }
     var r = cur.getBoundingClientRect();
     var x = (px - r.left) / r.width - 0.5;
     var y = (py - r.top) / r.height - 0.5;
-    cur.style.setProperty("--ry", (x * 7).toFixed(2) + "deg");
-    cur.style.setProperty("--rx", (-y * 6).toFixed(2) + "deg");
+    cur.style.setProperty("--ry", (x * 2.5).toFixed(2) + "deg");
+    cur.style.setProperty("--rx", (-y * 2).toFixed(2) + "deg");
     cur.classList.add("tilt");
   }
   grid.addEventListener("pointermove", function (e) {
