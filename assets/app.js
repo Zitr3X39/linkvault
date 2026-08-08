@@ -542,122 +542,26 @@
     return "";
   }
 
-  function feedSlides(it) {
-    const slides = [];
-    if (it.image) slides.push({ src: it.image });
-    try {
-      const u = new URL(it.url);
-      const h = u.hostname.replace(/^www\./, "");
-      let skip = /(^|\.)(youtube\.com|youtu\.be)$/.test(h);
-      for (let i = 0; i < NO_SHOT.length; i++) if (h === NO_SHOT[i] || h.endsWith("." + NO_SHOT[i])) { skip = true; break; }
-      if (!skip) {
-        const shot = "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(u.origin + u.pathname) + "?w=1280&h=720";
-        if (!slides.length || slides[0].src !== shot) slides.push({ src: shot });
-      }
-    } catch (e) {}
-    return slides.slice(0, 3);
-  }
-
-  function feedCardHtml(it, known) {
-    const cat = catInfo(it.category || "other");
-    const dom = it.domain || domainOf(it.url);
-    const letter = esc(String(it.title || dom || "?").trim().charAt(0).toUpperCase() || "?");
-    const descTxt = String(it.description_ru || it.description || "").trim();
-    const desc = descTxt
-      ? '<p class="feed-desc">' + esc(descTxt) + "</p>"
-      : '<p class="feed-desc feed-desc-dim">Описание подтянется при следующем сборе ленты.</p>';
-    const score = it.score ? '<span class="feed-score">▲ ' + nf.format(it.score) + "</span>" : "";
-    const when = it.found_at ? '<span class="feed-score">' + esc(df.format(new Date(it.found_at))) + "</span>" : "";
-    const added = known[it.url_key] || feedAdded.has(it.url_key);
-    const slides = feedSlides(it);
-    const multi = slides.length > 1;
-    const yt = it.type === "youtube" ? ytId(it.url) : "";
-    const media =
-      '<div class="feed-media" data-idx="0" data-slides="' + encodeURIComponent(JSON.stringify(slides)) + '">' +
-        '<span class="feed-letter">' + letter + "</span>" +
-        (slides.length ? '<img class="feed-shot" src="' + esc(slides[0].src) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">' : "") +
-        (yt ? '<button type="button" class="feed-play" data-play="' + esc(yt) + '" aria-label="Смотреть видео">' + PLAY_SVG + "</button>" : "") +
-        '<span class="feed-src-badge">' + esc(it.source || "") + "</span>" +
-        (multi ? '<button type="button" class="feed-arrow prev" data-slide="-1" aria-label="Предыдущий слайд">‹</button>' : "") +
-        (multi ? '<button type="button" class="feed-arrow next" data-slide="1" aria-label="Следующий слайд">›</button>' : "") +
-        (multi ? '<div class="feed-dots">' + slides.map((s, i) => '<i class="' + (i === 0 ? "on" : "") + '"></i>').join("") + "</div>" : "") +
-      "</div>";
-    return (
-      '<article class="feed-card reveal" style="--cat:' + esc(cat.color) + '">' +
-        media +
-        '<div class="feed-body">' +
-          '<h3 class="feed-title"><a href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.title || dom) + "</a></h3>" +
-          desc +
-          '<div class="feed-meta">' +
-            '<span class="tag">' + esc(cat.name) + "</span>" +
-            '<span class="tag tag-plain">' + esc(typeLabel(it.type)) + "</span>" +
-            score + when +
-          "</div>" +
-          '<div class="feed-actions">' +
-            '<a class="btn btn-sm feed-open" href="' + esc(it.url) + '" target="_blank" rel="noopener noreferrer">Открыть</a>' +
-            '<button type="button" class="btn btn-sm" data-feed-copy="' + esc(it.url_key) + '">Копировать</button>' +
-            (added
-              ? '<button type="button" class="btn btn-sm is-done" disabled>В хранилище ✓</button>'
-              : '<button type="button" class="btn btn-primary btn-sm" data-feed-add="' + esc(it.url_key) + '">Добавить себе</button>') +
-          "</div>" +
-        "</div>" +
-      "</article>"
-    );
-  }
-
-  let feedIO = null;
-  function feedReveal() {
-    const cards = el.feedList.querySelectorAll(".feed-card.reveal");
-    if (!("IntersectionObserver" in window)) {
-      cards.forEach((c) => c.classList.add("in"));
-      return;
-    }
-    if (feedIO) feedIO.disconnect();
-    feedIO = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          en.target.classList.add("in");
-          feedIO.unobserve(en.target);
-        }
-      });
-    }, { root: el.feedList, threshold: 0.15 });
-    cards.forEach((c) => feedIO.observe(c));
-  }
-
+  /* v14.2: разметку ленты рисует assets/news.js — редакционная сетка вместо
+     полноэкранного слайдера со скриншотами mshots. Здесь остаются только данные,
+     фильтры и действия; news.js возвращает кнопки с data-feed-add / data-feed-copy. */
   function renderFeed() {
     if (!el.feedList) return;
-    const items = state.feed.items;
-    const q = state.filters.q.trim().toLowerCase();
-    const srcs = [];
-    items.forEach((i) => { if (srcs.indexOf(i.source) < 0) srcs.push(i.source); });
-    el.feedChips.innerHTML = "";
-    const mk = (value, label, n) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "chip" + (state.feedSrc === value ? " is-on" : "");
-      b.dataset.value = value;
-      b.innerHTML = esc(label) + ' <span class="chip-num">' + nf.format(n) + "</span>";
-      return b;
-    };
-    el.feedChips.appendChild(mk("all", "Все", items.length));
-    srcs.forEach((s) => {
-      el.feedChips.appendChild(mk(s, s, items.filter((i) => i.source === s).length));
-    });
-    const list = items.filter((i) => {
-      if (state.feedSrc !== "all" && i.source !== state.feedSrc) return false;
-      if (!q) return true;
-      return ((i.title || "") + " " + (i.description_ru || "") + " " + (i.description || "") + " " + (i.url || "") + " " + (i.source || "")).toLowerCase().includes(q);
-    });
     const known = {};
     state.items.forEach((i) => { known[i.url_key] = 1; });
-    el.feedList.innerHTML = list.map((it) => feedCardHtml(it, known)).join("");
-    feedReveal();
-    el.feedEmpty.hidden = list.length > 0;
-    const fresh = items.filter((i) => { const t = new Date(i.found_at).getTime(); return t && (Date.now() - t) < 86400000; }).length;
-    if (el.feedBadge) { el.feedBadge.hidden = fresh === 0; el.feedBadge.textContent = String(fresh); }
-    el.feedMeta.textContent = items.length
-      ? nf.format(items.length) + " " + plural(items.length, "находка", "находки", "находок") + " · обновлено " + (state.feed.updatedAt ? df.format(new Date(state.feed.updatedAt)) : "—")
-      : "";
+    feedAdded.forEach((k) => { known[k] = 1; });
+    if (window.MONOLITH_NEWS && typeof window.MONOLITH_NEWS.render === "function") {
+      window.MONOLITH_NEWS.render({
+        items: state.feed.items,
+        updatedAt: state.feed.updatedAt,
+        filter: state.feedSrc,
+        query: state.filters.q,
+        known,
+      });
+      return;
+    }
+    el.feedList.innerHTML = "";
+    if (el.feedEmpty) el.feedEmpty.hidden = false;
   }
 
   async function addFromFeed(key) {
@@ -1068,48 +972,6 @@
     });
 
     if (el.feedList) el.feedList.addEventListener("click", (e) => {
-      const play = e.target.closest("[data-play]");
-      if (play) {
-        const media = play.closest(".feed-media");
-        if (media) {
-          const shot = media.querySelector(".feed-shot");
-          if (shot) shot.remove();
-          play.remove();
-          const f = document.createElement("iframe");
-          f.className = "feed-video";
-          f.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(play.dataset.play) + "?autoplay=1&rel=0";
-          f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          f.allowFullscreen = true;
-          f.title = "Видео";
-          media.appendChild(f);
-        }
-        return;
-      }
-      const sl = e.target.closest("[data-slide]");
-      if (sl) {
-        const media = sl.closest(".feed-media");
-        if (!media) return;
-        let slides = [];
-        try { slides = JSON.parse(decodeURIComponent(media.dataset.slides || "%5B%5D")); } catch (err) { slides = []; }
-        if (slides.length < 2) return;
-        let idx = (parseInt(media.dataset.idx || "0", 10) + (parseInt(sl.dataset.slide, 10) || 0) + slides.length) % slides.length;
-        media.dataset.idx = String(idx);
-        let shot = media.querySelector(".feed-shot");
-        if (!shot) {
-          shot = document.createElement("img");
-          shot.className = "feed-shot";
-          shot.alt = "";
-          shot.loading = "lazy";
-          shot.decoding = "async";
-          shot.setAttribute("referrerpolicy", "no-referrer");
-          shot.onerror = () => { shot.remove(); };
-          const letter = media.querySelector(".feed-letter");
-          media.insertBefore(shot, letter ? letter.nextSibling : media.firstChild);
-        }
-        shot.src = slides[idx].src;
-        media.querySelectorAll(".feed-dots i").forEach((d, i) => d.classList.toggle("on", i === idx));
-        return;
-      }
       const add = e.target.closest("[data-feed-add]");
       if (add) { addFromFeed(add.dataset.feedAdd); return; }
       const cp = e.target.closest("[data-feed-copy]");
