@@ -1,7 +1,23 @@
 {
  "version": 1,
- "updated_at": "2026-08-08T07:55:46.218Z",
+ "updated_at": "2026-08-08T08:02:26.903Z",
  "items": [
+  {
+   "url": "https://github.com/Significant-Gravitas/AutoGPT",
+   "url_key": "github.com/significant-gravitas/autogpt",
+   "title": "Significant-Gravitas/AutoGPT",
+   "description": "AutoGPT — это концепция доступного искусственного интеллекта для всех, который можно использовать и развивать. Наша миссия — предоставить инструменты, чтобы вы могли сосредоточиться на том, что важно. · Питон",
+   "note": "",
+   "domain": "github.com",
+   "category": "vibecoding",
+   "type": "github",
+   "source": "Вручную",
+   "tags": [],
+   "favorite": false,
+   "stars": 186392,
+   "enriched": true,
+   "added_at": "2026-08-08T08:02:25.388Z"
+  },
   {
    "url": "https://github.com/unclebob/swarm-forge",
    "url_key": "github.com/unclebob/swarm-forge",
