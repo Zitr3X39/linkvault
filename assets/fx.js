@@ -208,6 +208,10 @@
       });
       paintStats();
     });
+  /* v14.2: единый источник правды — статистика следует за state из app.js */
+  document.addEventListener("monolith:data-changed", function (e) {
+    if (e.detail && Array.isArray(e.detail.items)) { ITEMS = e.detail.items; paintStats(); }
+  });
 
   /* ---------- command palette ---------- */
   var pal = make("div", "cmdk");
