@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updated_at": "2026-08-07T12:47:20.140Z",
+ "updated_at": "2026-08-08T07:54:21.715Z",
  "items": [
   {
    "url": "https://github.com/simple-icons/simple-icons",
@@ -22,7 +22,7 @@
    "url": "https://loecsen.com/",
    "url_key": "loecsen.com/",
    "title": "loecsen.com",
-   "description": "",
+   "description": "языки",
    "note": "",
    "domain": "loecsen.com",
    "category": "other",
@@ -361,8 +361,8 @@
    "description": "Расширение Chrome: находит и скачивает видео и другие медиа с любой открытой страницы.",
    "note": "",
    "domain": "chromewebstore.google.com",
-   "category": "extensions",
-   "type": "site",
+   "category": "video",
+   "type": "extension",
    "source": "Вручную",
    "tags": [],
    "favorite": false,
