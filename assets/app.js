@@ -473,7 +473,7 @@
         "</div>" +
       "</div>";
     return (
-      '<article class="card" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
+      '<article class="card" tabindex="0" style="--cat:' + esc(cat.color) + '" data-id="' + esc(it.url_key) + '">' +
         '<div class="flip-inner">' + front + back + "</div>" +
       "</article>"
     );
@@ -497,11 +497,15 @@
 
   function renderMeta() {
     const total = state.items.length;
-    const when = state.updatedAt ? df.format(new Date(state.updatedAt)) : "—";
-    el.brandMeta.textContent = nf.format(total) + " " + plural(total, "ссылка", "ссылки", "ссылок") + " · обновлено " + when;
+    el.brandMeta.textContent = nf.format(total) + " " + plural(total, "ССЫЛКА", "ССЫЛКИ", "ССЫЛОК");
+    const when = state.updatedAt ? df.format(new Date(state.updatedAt)) : "";
+    if (when) el.brandMeta.title = "Обновлено " + when;
   }
 
-  function renderAll() { applyOverlay(); renderNav(); renderChips(); renderCards(); renderMeta(); }
+  function renderAll() {
+    applyOverlay(); renderNav(); renderChips(); renderCards(); renderMeta();
+    document.dispatchEvent(new CustomEvent("monolith:data-changed", { detail: { items: state.items } }));
+  }
 
   /* ---------- tabs + feed ---------- */
   function switchTab(tab) {
@@ -659,27 +663,42 @@
   async function addFromFeed(key) {
     const it = state.feed.items.find((x) => x.url_key === key);
     if (!it) return;
-    if (state.items.some((x) => x.url_key === key)) { toast("Уже в хранилище"); return; }
+    if (state.items.some((x) => x.url_key === key) || feedAdded.has(key)) { toast("Уже в хранилище"); return; }
+    const now = new Date().toISOString();
+    const text = (it.title || "") + " " + (it.description || "");
+    const item = {
+      url: it.url, url_key: key,
+      title: String(it.title_ru || it.title || "").trim() || guessTitle(it.url),
+      description: String(it.summary_ru || it.description_ru || it.description || "").slice(0, 400),
+      note: "", domain: it.domain || domainOf(it.url),
+      category: it.category && it.category !== "other" ? it.category : detectCategory(it.url, text),
+      type: it.type || detectType(it.url),
+      source: "Лента новостей · " + (it.source || ""),
+      tags: Array.isArray(it.tags) ? it.tags.slice(0, 6) : [],
+      favorite: false, stars: 0, enriched: true, added_at: now,
+    };
+    /* optimistic: карточка и счётчики обновляются сразу, persistence — следом в фоне */
+    feedAdded.add(key);
+    const o = readOverlay();
+    o.added = o.added.concat([item]);
+    writeOverlay(o);
+    renderAll();
+    renderFeed();
+    toast("В хранилище ✓ · " + catInfo(item.category).name);
     if (WORKER_URL) {
       try {
         const r = await fetch(WORKER_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: it.url, title: it.title, description: it.description }),
+          body: JSON.stringify(item),
         });
         if (!r.ok) throw new Error(String(r.status));
-        feedAdded.add(key);
-        renderFeed();
-        toast("Отправлено в хранилище — появится на сайте через ~1 минуту");
       } catch (e) {
-        toast("Воркер не ответил — открыл диалог добавления");
-        el.addText.value = it.url + "\n" + it.title;
-        openDialog(el.dlgAdd);
+        toast("Воркер не ответил — правка осталась в браузере, синхронизируй позже");
       }
       return;
     }
-    await addLinks(it.url + "\n" + it.title + (it.description ? " — " + it.description : ""), true);
-    renderFeed();
+    persist("Ссылка из ленты: " + item.title);
   }
 
   async function copyLink(url, btn) {
@@ -928,7 +947,7 @@
           }
         } catch (e5) { /* merge skipped, local wins */ }
       }
-      const body = { message: "LinkVault: " + (message || "обновление"), content: toBase64(buildPayload()), branch: cfg.branch };
+      const body = { message: "MONOLITH: " + (message || "обновление"), content: toBase64(buildPayload()), branch: cfg.branch };
       if (sha) body.sha = sha;
       const put = await fetch(GH_API + "/repos/" + cfg.repo + "/contents/" + path, { method: "PUT", headers: headers, body: JSON.stringify(body) });
       if (!put.ok) { toast("GitHub отказал: " + put.status + ". Проверь токен и имя репозитория."); return false; }
@@ -1013,18 +1032,39 @@
       const b = e.target.closest(".chip"); if (!b) return;
       state.filters.src = b.dataset.value; renderNav(); renderChips(); renderCards(); syncUrl();
     });
+    const flipCard = (card, force) => {
+      const on = force !== undefined ? force : !card.classList.contains("is-flipped");
+      el.grid.querySelectorAll(".card.is-flipped").forEach((c) => { if (c !== card) c.classList.remove("is-flipped"); });
+      card.classList.toggle("is-flipped", on);
+    };
     el.grid.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]"); if (!btn) return;
-      const card = btn.closest(".card"); if (!card) return;
+      const card = e.target.closest(".card"); if (!card) return;
       const key = card.dataset.id;
-      const act = btn.dataset.action;
-      if (act === "edit") { openEdit(key); return; }
-      const it = state.items.find((x) => x.url_key === key);
-      if (!it) return;
-      if (act === "copy") { copyLink(it.url, btn); return; }
-      if (act === "flip") { card.classList.toggle("is-flipped"); return; }
-      if (act === "open") { window.open(it.url, "_blank", "noopener"); return; }
-      patchItem(key, { favorite: !it.favorite }, it.favorite ? "Убрано из избранного" : "Добавлено в избранное");
+      const btn = e.target.closest("[data-action]");
+      if (btn) {
+        const act = btn.dataset.action;
+        if (act === "edit") { openEdit(key); return; }
+        const it = state.items.find((x) => x.url_key === key);
+        if (!it) return;
+        if (act === "copy") { copyLink(it.url, btn); return; }
+        if (act === "flip") { flipCard(card); return; }
+        if (act === "open") { window.open(it.url, "_blank", "noopener"); return; }
+        patchItem(key, { favorite: !it.favorite }, it.favorite ? "Убрано из избранного" : "Добавлено в избранное");
+        return;
+      }
+      if (e.target.closest("a, button, input, textarea, select, label, [data-no-flip], [contenteditable='true']")) return;
+      flipCard(card);
+    });
+    el.grid.addEventListener("keydown", (e) => {
+      const card = e.target.closest ? e.target.closest(".card") : null;
+      if (card && (e.key === "Enter" || e.key === " ") && e.target === card) {
+        e.preventDefault();
+        flipCard(card);
+        return;
+      }
+      if (e.key === "Escape") {
+        el.grid.querySelectorAll(".card.is-flipped").forEach((c) => c.classList.remove("is-flipped"));
+      }
     });
 
     if (el.feedList) el.feedList.addEventListener("click", (e) => {
@@ -1246,6 +1286,12 @@
   async function boot() {
     ["brandMeta","searchForm","q","btnAdd","btnTheme","btnSettings","navCategories","navSources","chips","btnExport","pendingHint","viewTitle","viewCount","sort","btnFav","grid","empty","emptyTitle","emptyText","btnEmptyAdd","dlgAdd","formAdd","addText","addEnrich","addSubmit","dlgEdit","formEdit","editTitle","editDesc","editCat","editTags","editNote","editUrl","btnDelete","dlgSettings","formSettings","setRepo","setBranch","setToken","btnForget","toast","feedWrap","feedList","feedChips","feedBadge","feedMeta","feedEmpty"].forEach((id) => { el[id] = $(id); });
     el.layout = document.querySelector(".layout");
+
+    // v14.2: миграция настроек после переименования linkvault → monolith
+    try {
+      const oldRepo = (localStorage.getItem(LS.repo) || "").trim().toLowerCase();
+      if (oldRepo === "zitr3x39/linkvault") localStorage.setItem(LS.repo, "Zitr3X39/monolith");
+    } catch (e) {}
 
     const saved = localStorage.getItem(LS.theme);
     setTheme(saved || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
