@@ -76,3 +76,7 @@
 .flip-back{pointer-events:none}
 .card.is-flipped .flip-front{pointer-events:none}
 .card.is-flipped .flip-back{pointer-events:auto}
+/* v14.2: растянутая на всю карточку ссылка-оверлей убрана — пустая зона флипает */
+.card-title a::after{content:none}
+.card{cursor:pointer}
+.card a,.card button,.card input,.card select,.card textarea,.card label{cursor:pointer}
